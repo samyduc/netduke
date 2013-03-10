@@ -1,26 +1,33 @@
 #pragma once
 
 #include "netdef.h"
-#include "peer.h"
+#include "layer.h"
+
+#ifdef _WIN32
+	#include <winsock2.h>
+	#include <ws2tcpip.h>
+#endif
 
 namespace NetDuke
 {
 
-class Stream
+class Peer;
+class Listener;
+
+class Stream : public Layer
 {
 public:
-	explicit	Stream(const Peer& _peer);
-	virtual		~Stream();
 
-	netBool		IsBind() const { return m_isBind; }
+	virtual void			CreateAndBind() = 0;
+	virtual inline size_t	GetHeaderSize() const = 0;
 
+	virtual netBool			IsValid() const = 0;
+	virtual const Peer&		GetPeer() const = 0;
+	virtual SOCKET			GetSocket() const = 0;
 
-private:
-	netBool m_isBind;
-
-}
-
-
+	virtual netBool			AttachListener(Listener& _listener) = 0;
+	virtual netBool			DetachListener(Listener& _listener) = 0;
+};
 
 
 

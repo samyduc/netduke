@@ -1,4 +1,9 @@
 #include "transport.h"
+
+#include "stream.h"
+#include "listener.h"
+#include "udplistener.h"
+#include "udpstream.h"
 #include "serializer.h"
 #include "serializerLess.h"
 #include "peer.h"
@@ -14,26 +19,29 @@ static std::mutex s_lock;
 
 void Transport::Tick()
 {
+	for(streams_t::iterator it=m_streams.begin(); it != m_streams.end(); ++it)
+	{
+		Stream *stream = (*it);
+		stream->Tick();
+	}
+
 	for(listeners_t::iterator it=m_listeners.begin(); it != m_listeners.end(); ++it)
 	{
 		Listener *listener = (*it);
-
-		listener->FlushSend();
+		listener->Tick();
 	}
-
-	// can be multi threaded
-	Recv();
 }
 
-Listener* Transport::GetListener(const Peer &_peer) const
+Listener* Transport::GetListener(netU32 _type) const
 {
 	Listener* listener = nullptr;
 
 	for(listeners_t::const_iterator it=m_listeners.begin(); it != m_listeners.end(); ++it)
 	{
-		if(_peer == (*it)->GetPeer())
+		Listener *localListener = (*it);
+		if(localListener->GetType() == _type)
 		{
-			listener = (*it);
+			listener = localListener;
 			break;
 		}
 	}
@@ -41,48 +49,65 @@ Listener* Transport::GetListener(const Peer &_peer) const
 	return listener;
 }
 
-const Transport::listeners_t& Transport::GetListeners() const
+netBool Transport::Pack(SerializerLess& _ser, const Peer& _peer)
 {
-	return m_listeners;
+	(void)_ser;
+	(void)_peer;
+	return false;
 }
 
-Listener* Transport::Listen(const Peer &_peer)
+netBool Transport::UnPack(SerializerLess& _ser, const Peer& _peer)
+{
+	(void)_ser;
+	(void)_peer;
+	return false;
+}
+
+void Transport::Listen(const Peer &_peer)
 {
 	assert(s_IsPlatformInit);
-	Listener *listener = nullptr;
-
-	if(GetListener(_peer) == nullptr)
+	
+	// look for existing stream
+	netBool is_new = true;
+	for(streams_t::iterator it=m_streams.begin(); it != m_streams.end(); ++it)
 	{
-
-		listener = new Listener(_peer);
-		if(listener->IsBind())
+		Stream* stream = (*it);
+		if(stream->GetPeer() == _peer)
 		{
-			m_listeners.push_back(listener);
-		}
-		else
-		{
-			// can fail if multiple instance of the stack are instaciated
-			delete listener;
-			listener = nullptr;
+			is_new = false;
+			break;
 		}
 	}
 
-	return listener;
+	if(is_new)
+	{
+		// create stream
+		UDPStream *udpstream = new UDPStream(_peer);
+		udpstream->CreateAndBind();
+		m_streams.push_back(udpstream);
+
+		// create listener
+		UDPListener *udplistener = new UDPListener();
+		m_listeners.push_back(udplistener);
+	
+		// attach
+		udpstream->AttachListener(*udplistener);
+	}
 }
 
-void Transport::Send(const Serializer& _ser, const Peer& _peer)
+void Transport::Send(Serializer& _ser, const Peer& _peer, netU32 _type)
 {
-	assert(m_listeners.size() != 0);
-	Listener& listener = *m_listeners.front();
-	listener.Push(_ser, _peer);
+	Listener *listener = GetListener(_type);
+
+	if(listener)
+	{
+		_ser.ResetCursor();
+		SerializerLess serless(_ser);
+		listener->Push(serless, _peer);
+	}
 }
 
-void Transport::Send(const Serializer& _ser, const Peer& _peer, Listener& _listener)
-{
-	_listener.Push(_ser, _peer);
-}
-
-void Transport::Recv()
+/*void Transport::Recv()
 {
 	struct timeval time_val;
 	time_val.tv_sec = 0;
@@ -114,43 +139,24 @@ void Transport::Recv()
 			}
 		}
 	}
+}*/
+
+netBool Transport::Push(SerializerLess &_ser, const Peer& _peer)
+{
+	(void)_ser;
+	(void)_peer;
+	return false;
 }
 
-void Transport::Unpack(SerializerLess& _ser, const Peer& _peer)
+netBool Transport::Pull(SerializerLess &_ser, Peer& _peer)
 {
-	Channel& channel = GetChannel(_peer);
+	netBool isFound = false;
 
-	// TODO : check reliable
-	bool result = _ser.Read(s_typeTransport);
-	assert(result);
-
-	// there is only serializer here
-	while(_ser.GetCursor() != _ser.GetSize())
+	for(listeners_t::iterator it=m_listeners.begin(); it != m_listeners.end(); ++it)
 	{
-		SerializerLess payload;
-		_ser >> payload;
-
-		// replace by pool
-		channel.Push(payload);
-	}
-
-	_ser.Close();
-}
-
-bool Transport::Pull(SerializerLess &_ser, Peer& _peer)
-{
-	bool isFound = false;
-
-	for(channels_t::iterator it = m_recvChannels.begin(); it != m_recvChannels.end(); ++it)
-	{
-		Channel& channel = *(*it).second;
-		if(!channel.IsEmpty())
+		Listener *listener = (*it);
+		if(listener->Pull(_ser, _peer))
 		{
-			SerializerLess ser;
-			channel.Pop(ser);
-			ser.ResetCursor();
-			_ser = ser;
-			_peer = (*it).first;
 			isFound = true;
 			break;
 		}
@@ -159,29 +165,11 @@ bool Transport::Pull(SerializerLess &_ser, Peer& _peer)
 	return isFound;
 }
 
-Channel& Transport::GetChannel(const Peer& _peer)
-{
-	channels_t::iterator it = m_recvChannels.find(_peer);
-	Channel *channel_out = nullptr;
-
-	if(it != m_recvChannels.end())
-	{
-		channel_out = (*it).second;
-	}
-	else
-	{
-		channel_out = new Channel(_peer);
-		m_recvChannels[_peer] = channel_out;
-	}
-
-	return *channel_out;
-}
-
 void Transport::InitPlatform()
 {
 	if(!s_IsPlatformInit)
 	{
-		FD_ZERO(&m_readfs);
+		//FD_ZERO(&m_readfs);
 		s_IsPlatformInit = InitPlatformPrivate();
 	}
 }
@@ -197,7 +185,14 @@ void Transport::DesInitPlatform()
 		}
 		m_listeners.clear();
 
-		FD_ZERO(&m_readfs);
+		for(streams_t::iterator it=m_streams.begin(); it != m_streams.end(); ++it)
+		{
+			delete (*it);
+		}
+		m_listeners.clear();
+		
+
+		//FD_ZERO(&m_readfs);
 		s_IsPlatformInit = DesInitPlatformPrivate();
 	}
 }

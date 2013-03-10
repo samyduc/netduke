@@ -32,30 +32,16 @@ Serializer& SerializerPool::GetSerializer()
 
 	Serializer* ser = m_serializers[m_internalCursor];
 
+	size_t anti_loop = 0;
 	while( ser->GetRef() != 0)
 	{
 		ser = m_serializers[m_internalCursor];
 		m_internalCursor++;
 		if(m_internalCursor >= m_serializers.size()) m_internalCursor = 0;
+		++anti_loop;
+
+		if(anti_loop > m_serializers.size()) assert(false); // empty pool or bad ref counting
 	}
-
-
-	//Serializer *ser = m_serializers.front();
-	//assert(ser != nullptr);
-
-	//Serializer *ser = new Serializer(Serializer::MTU);
-	//if(ref->IsAvailable())
-	//{
-	//	Switch();
-	//}
-	/*else
-	{
-		// pool full
-		assert(false);
-	}*/
-
-	//ref->IncRef();
-	//ref->ResetCursor();
 
 	ser->ResetCursor();
 	return *ser;

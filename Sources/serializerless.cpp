@@ -57,7 +57,7 @@ void SerializerLess::SliceBuffer(Serializer& _ser, size_t _size)
 	m_buffer_size = _size;
 
 	assert(m_ref == nullptr);
-	m_ref = &_ser;
+	m_ref = _ser.GetSerializer();
 	IncRef();
 }
 
@@ -70,7 +70,7 @@ void SerializerLess::SliceBuffer(Serializer& _ser, size_t _sizeA, size_t _sizeB)
 	m_buffer_size = _sizeB - _sizeA;
 
 	assert(m_ref == nullptr);
-	m_ref = &_ser;
+	m_ref = _ser.GetSerializer();
 	IncRef();
 }
 
@@ -99,7 +99,7 @@ SerializerLess& SerializerLess::operator >>(SerializerLess& _ser)
 	SetCursor(GetCursor() + length);
 
 	_ser.m_ref = m_ref;
-	_ser.IncRef();
+	//_ser.IncRef(); // IncRef done in slice buffers
 
 	return *this;
 }

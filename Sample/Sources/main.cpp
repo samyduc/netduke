@@ -23,7 +23,7 @@ void threaded_server()
 
 void threaded_client()
 {
-	NetDukeSample::PingPongClient client("127.0.0.1", 0);
+	NetDukeSample::PingPongClient client("127.0.0.1", 15002);
 
 	bool bCond = true;
 	while(bCond)

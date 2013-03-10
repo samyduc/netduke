@@ -30,7 +30,6 @@ class Serializer
 {
 public:
 
-	friend	class Listener;
 	friend	class SerializerLess;
 
 	explicit		Serializer(size_t);
@@ -43,6 +42,7 @@ public:
 	netU32			GetType() const;
 	size_t			GetBufferSize() const { return m_buffer_size; }
 	const netU8*	GetBuffer() const { return m_buffer; }
+	netU8*			GetRawBuffer() const { return m_buffer; }
 	void			SetCursor(size_t _pos);
 	size_t			GetCursor() const { return m_cursor_pos; }
 	void			ResetCursor();
@@ -87,9 +87,11 @@ public:
 	Serializer& operator >>(SerializerLess&);
 
 	// ref counting
-	virtual void	IncRef() { ++m_ref_nb; }
-	virtual void	DecRef() { assert(m_ref_nb > 0); --m_ref_nb; /*if(m_ref_nb == 0) delete this;*/}
-	virtual size_t	GetRef() { return m_ref_nb; }
+	virtual void		IncRef() { ++m_ref_nb; }
+	virtual void		DecRef() { assert(m_ref_nb > 0); --m_ref_nb; /*if(m_ref_nb == 0) delete this;*/}
+	virtual size_t		GetRef() { return m_ref_nb; }
+
+	virtual Serializer*	GetSerializer() { return this; }
 
 public:
 	const static size_t MTU = 1400;

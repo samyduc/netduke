@@ -1,5 +1,7 @@
 #include "pingpong.h"
 
+#include "serializerless.h"
+
 #include <mutex>
 
 namespace NetDukeSample
@@ -9,13 +11,13 @@ static std::mutex g_globalLock;
 
 void Log(char *fmt, ...)
 {
-	std::lock_guard<std::mutex> gLock(g_globalLock);
+	/*std::lock_guard<std::mutex> gLock(g_globalLock);
 
 	va_list	va;
 	va_start (va, fmt) ;
 		//netVsprintf(s_logtxt,sizeof(s_logtxt)-1 , fmt, va) ;
 		printf(fmt, va);
-	va_end (va);
+	va_end (va);*/
 }
 
 PingPongServer::PingPongServer(NetDuke::netU16 _port)
@@ -41,11 +43,11 @@ void PingPongServer::Tick()
 	{
 		// pong
 		NetDuke::Serializer ser_copy(ser);
-		m_transport.Send(ser_copy, peer);
+		m_transport.Send(ser_copy, peer, NetDuke::s_typeUDPListener);
 
 		//delete ser.GetBuffer();
 		ser.ResetCursor();
-		ser.DecRef();
+		//ser.DecRef();
 	}
 }
 
@@ -77,7 +79,7 @@ void PingPongClient::Tick()
 		m_serializer.Close();
 
 		m_clock = clock();
-		m_transport.Send(m_serializer, m_peer);
+		m_transport.Send(m_serializer, m_peer, NetDuke::s_typeUDPListener);
 	}
 	else
 	{
@@ -85,22 +87,24 @@ void PingPongClient::Tick()
 
 		// ping
 		NetDuke::SerializerLess ser;
+		clock_t interval = clock() - m_clock;
 
 		while(m_transport.Pull(ser, peer))
 		{			
 			m_state = false;
 			// log recv
-			m_clock = clock() - m_clock;
-			Log("clicks :%d clicks seconds :%f \n", m_clock, ((float)m_clock)/CLOCKS_PER_SEC);
+			std::lock_guard<std::mutex> gLock(g_globalLock);
+			printf("clicks :%llu clicks seconds :%f \n", interval, ((double)interval)/CLOCKS_PER_SEC);
 
 			// do not do this (the uffer can be shared by multiple location
 			//delete ser.GetBuffer();
-			ser.DecRef();
+			//ser.DecRef();
 		}
 
-		if(clock() - m_clock > 1000)
+		if(interval > 1000)
 		{
-			Log("retry \n");
+			std::lock_guard<std::mutex> gLock(g_globalLock);
+			printf("retry \n");
 			m_state = false;
 		}
 	}

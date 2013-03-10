@@ -3,6 +3,7 @@
 #include "netdef.h"
 #include "crc.h"
 
+#include "layer.h"
 #include "listener.h"
 
 #include <list>
@@ -17,14 +18,12 @@ namespace NetDuke
 
 class Channel;
 class Serializer;
+class SerializerLess;
 class Peer;
 
 
-class Transport
+class Transport : public Layer
 {
-private:
-	typedef std::list<Listener*> listeners_t;
-	listeners_t m_listeners;
 public:
 						Transport() {}
 						~Transport() {}
@@ -33,27 +32,24 @@ public:
 	void				DesInitPlatform();
 
 	void				Tick();
-	Listener*			Listen(const Peer &_peer);
+	netU32				GetType() const { return s_typeTransport; }
 
-	Listener*			GetListener(const Peer &_peer) const;
-	const listeners_t&	GetListeners() const;
+	// helper
+	void				Listen(const Peer &_peer);
+	Listener*			GetListener(netU32 _type) const;
+	void				Send(Serializer& _ser, const Peer& _peer, netU32 _type);
 
-	void				Send(const Serializer& _ser, const Peer& _peer);
-	void				Send(const Serializer& _ser, const Peer& _peer, Listener& _listener);
-	bool				Pull(SerializerLess &_ser, Peer& _peer);
+	netBool				Push(SerializerLess &_ser, const Peer& _peer);
+	netBool				Pull(SerializerLess &_ser, Peer& _peer);
 
-public:
-	
+protected:
+	netBool				Pack(SerializerLess& _ser, const Peer& _peer);
+	netBool				UnPack(SerializerLess& _ser, const Peer& _peer);
 	
 private:
-	// TODO : refactor -> doublon with listener
-	Channel&			GetChannel(const Peer& _peer);
-	void				Recv();
-	void				Unpack(SerializerLess& _ser, const Peer& _peer);
 
-	fd_set m_readfs;
-
-	channels_t m_recvChannels;
+	listeners_t m_listeners;
+	streams_t	m_streams;
 
 #if defined(_WIN32)
 	bool				InitPlatformPrivate();

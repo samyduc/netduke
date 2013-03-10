@@ -75,8 +75,9 @@ private:
 };
 
 static const netU32 s_typeTransport = CRC32::Compute("transport");
-static const netU32 s_typeListener = CRC32::Compute("listener");
-static const netU32 s_typeCrc = CRC32::Compute("crc");
+static const netU32 s_typeUDPListener = CRC32::Compute("udplistener");
+static const netU32 s_typeUDPStream = CRC32::Compute("udpstream");
+static const netU32 s_typeCrc32 = CRC32::Compute("crc32");
 
 
 }
