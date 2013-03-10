@@ -30,7 +30,7 @@ bool Peer::operator==(const Peer &_peer) const
 
 bool Peer::operator<(const Peer &_peer) const
 {
-	return m_addr.sin_addr.S_un.S_addr < _peer.m_addr.sin_addr.S_un.S_addr;
+	return m_addr.sin_addr.S_un.S_addr < _peer.m_addr.sin_addr.S_un.S_addr || (m_addr.sin_addr.S_un.S_addr == _peer.m_addr.sin_addr.S_un.S_addr && m_addr.sin_port < _peer.m_addr.sin_port);
 }
 
 const SOCKADDR_IN &Peer::GetNativeStruct() const

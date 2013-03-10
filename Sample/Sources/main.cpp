@@ -1,13 +1,11 @@
 
 #include "transport.h"
-#include "serializer.h"
-#include "peer.h"
-#include "listener.h"
 
 #include "pingpong.h"
+
 #include <iostream>
 #include <thread>
-
+#include <list>
 
 void threaded_server()
 {
@@ -96,22 +94,16 @@ int main(void)
 	}*/
 
 	// thread
-	Sleep(150);
 	std::thread t1(threaded_server);
 	Sleep(50);
-	std::thread t2(threaded_client);
-	std::thread t3(threaded_client);
-	std::thread t4(threaded_client);
-	std::thread t5(threaded_client);
+
+	std::list<std::thread> threads;
+	for(size_t i = 0; i<5; ++i)
+	{
+		threads.push_back(std::thread(threaded_client));
+	}
 
 	t1.join();
-	t2.join();
-	t3.join();
-	t4.join();
-	t5.join();
-
-	//threaded_server();
-	//threaded_client();
 
 	return 0;
 }

@@ -2,7 +2,9 @@
 
 #include "serializerless.h"
 
+#include <thread>
 #include <mutex>
+#include <iostream>
 
 namespace NetDukeSample
 {
@@ -90,12 +92,17 @@ void PingPongClient::Tick()
 		clock_t interval = clock() - m_clock;
 
 		while(m_transport.Pull(ser, peer))
-		{			
+		{		
+			if(ser.GetRef() != 1)
+			{
+				int a = 2;
+				(void)a;
+			}
 			m_state = false;
 			// log recv
 			std::lock_guard<std::mutex> gLock(g_globalLock);
-			printf("clicks :%llu clicks seconds :%f \n", interval, ((double)interval)/CLOCKS_PER_SEC);
-
+			std::thread::id id = std::this_thread::get_id();
+			printf("threadId:%llu, clicks :%llu clicks seconds :%f \n", id, interval, ((double)interval)/CLOCKS_PER_SEC);
 			// do not do this (the uffer can be shared by multiple location
 			//delete ser.GetBuffer();
 			//ser.DecRef();
@@ -104,7 +111,7 @@ void PingPongClient::Tick()
 		if(interval > 1000)
 		{
 			std::lock_guard<std::mutex> gLock(g_globalLock);
-			printf("retry \n");
+			printf("threadId:%llu, retry \n", std::this_thread::get_id());
 			m_state = false;
 		}
 	}

@@ -145,8 +145,10 @@ void UDPStream::CreateAndBind()
 	int err = bind(m_socket, (struct sockaddr*)&native_addr, sizeof(native_addr));
 
 	assert(err == 0);
-	
-	//FD_SET(m_socket, readfs);
+
+	// overwrite port (if automatic attribution)
+	int native_size = sizeof(native_addr);
+	err = getsockname(m_socket, (struct sockaddr *)&native_addr, &native_size);
 
 	m_isValid = (m_socket != 0);
 }
