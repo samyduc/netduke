@@ -81,7 +81,11 @@ void PingPongClient::Tick()
 		m_serializer.Close();
 
 		m_clock = clock();
+		// force bundling
 		m_transport.Send(m_serializer, m_peer, NetDuke::s_typeUDPListener);
+
+		NetDuke::Serializer serializer(m_serializer);
+		m_transport.Send(serializer, m_peer, NetDuke::s_typeUDPListener);
 	}
 	else
 	{
@@ -108,12 +112,12 @@ void PingPongClient::Tick()
 			//ser.DecRef();
 		}
 
-		if(interval > 1000)
+		/*if(interval > 1000)
 		{
 			std::lock_guard<std::mutex> gLock(g_globalLock);
 			printf("threadId:%llu, retry \n", std::this_thread::get_id());
 			m_state = false;
-		}
+		}*/
 	}
 }
 

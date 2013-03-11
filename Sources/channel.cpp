@@ -41,8 +41,6 @@ netBool Channel::Pop(SerializerLess& _ser)
 	{
 		_ser = m_serializers.back();
 		m_serializers.pop();
-
-		//ser->DecRef();
 	}
 	else
 	{

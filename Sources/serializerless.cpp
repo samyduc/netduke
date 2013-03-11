@@ -8,21 +8,18 @@ SerializerLess::SerializerLess()
 	: Serializer()
 	, m_ref(nullptr)
 {
-
 }
 
 SerializerLess::SerializerLess(Serializer& _ser)
 	: Serializer()
 	, m_ref(nullptr)
 {
-	//m_buffer = _ser.m_buffer + _ser.GetCursor();
-	//m_buffer_size = _ser.GetBufferSize() - _ser.GetCursor();
-
 	SliceBuffer(_ser, _ser.GetCursor(), _ser.GetBufferSize());
 }
 
 SerializerLess::SerializerLess(const SerializerLess& _ser)
 	: Serializer()
+	, m_ref(nullptr)
 {
 	Copy(_ser);
 }
@@ -95,17 +92,22 @@ SerializerLess& SerializerLess::operator >>(SerializerLess& _ser)
 
 	SetCursor(old_cursor);
 
+	// IncRef done in slice buffers
 	_ser.SliceBuffer(*this, length);
 	SetCursor(GetCursor() + length);
 
 	_ser.m_ref = m_ref;
-	//_ser.IncRef(); // IncRef done in slice buffers
 
 	return *this;
 }
 
 void SerializerLess::Copy(const SerializerLess &_copy)
 {
+	if(GetSerializer() != nullptr)
+	{
+		DecRef();
+	}
+
 	m_ref = _copy.m_ref;
 	m_buffer_size = _copy.m_buffer_size;
 	m_cursor_pos = _copy.m_cursor_pos;

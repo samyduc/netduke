@@ -107,40 +107,6 @@ void Transport::Send(Serializer& _ser, const Peer& _peer, netU32 _type)
 	}
 }
 
-/*void Transport::Recv()
-{
-	struct timeval time_val;
-	time_val.tv_sec = 0;
-	time_val.tv_usec = 0;
-
-	// TODO : can be optimized !!!
-	for(listeners_t::iterator it=m_listeners.begin(); it != m_listeners.end(); ++it)
-	{
-		Listener *listener = (*it);
-		SOCKET socket = listener->GetSocket();
-		
-		FD_ZERO(&m_readfs);
-		FD_SET(socket, &m_readfs);
-		if(select(static_cast<int>(socket + 1), &m_readfs, NULL, NULL, &time_val) >= 0)
-		{
-			if(FD_ISSET(socket, &m_readfs) > 0)
-			{
-				listener->FlushRecv();
-
-				// pull the received packet
-				Peer peer;
-				SerializerLess ser;
-
-				if(listener->Pull(ser, peer))
-				{
-					Unpack(ser, peer);
-					//delete ser;
-				}
-			}
-		}
-	}
-}*/
-
 netBool Transport::Push(SerializerLess &_ser, const Peer& _peer)
 {
 	(void)_ser;
