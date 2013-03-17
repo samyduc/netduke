@@ -2,7 +2,8 @@
 
 #include "stream.h"
 #include "listener.h"
-#include "udplistener.h"
+#include "unreliablelistener.h"
+#include "reliablelistener.h"
 #include "udpstream.h"
 #include "serializer.h"
 #include "serializerLess.h"
@@ -87,11 +88,15 @@ void Transport::Listen(const Peer &_peer)
 		m_streams.push_back(udpstream);
 
 		// create listener
-		UDPListener *udplistener = new UDPListener();
-		m_listeners.push_back(udplistener);
+		UnreliableListener *unreliablelistener = new UnreliableListener();
+		m_listeners.push_back(unreliablelistener);
+
+		ReliableListener *reliablelistener = new ReliableListener();
+		m_listeners.push_back(reliablelistener);
 	
 		// attach
-		udpstream->AttachListener(*udplistener);
+		udpstream->AttachListener(*unreliablelistener);
+		udpstream->AttachListener(*reliablelistener);
 	}
 }
 

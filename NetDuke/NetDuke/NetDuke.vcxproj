@@ -126,24 +126,26 @@
     <ClInclude Include="..\..\Includes\listener.h" />
     <ClInclude Include="..\..\Includes\netdef.h" />
     <ClInclude Include="..\..\Includes\peer.h" />
+    <ClInclude Include="..\..\Includes\reliablelistener.h" />
     <ClInclude Include="..\..\Includes\serializer.h" />
     <ClInclude Include="..\..\Includes\SerializerLess.h" />
     <ClInclude Include="..\..\Includes\serializerpool.h" />
     <ClInclude Include="..\..\Includes\layer.h" />
     <ClInclude Include="..\..\Includes\stream.h" />
     <ClInclude Include="..\..\Includes\transport.h" />
-    <ClInclude Include="..\..\Includes\udplistener.h" />
+    <ClInclude Include="..\..\Includes\unreliablelistener.h" />
     <ClInclude Include="..\..\Includes\udpstream.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Sources\channel.cpp" />
     <ClCompile Include="..\..\Sources\crc.cpp" />
     <ClCompile Include="..\..\Sources\peer.cpp" />
+    <ClCompile Include="..\..\Sources\reliablelistener.cpp" />
     <ClCompile Include="..\..\Sources\serializer.cpp" />
     <ClCompile Include="..\..\Sources\SerializerLess.cpp" />
     <ClCompile Include="..\..\Sources\serializerpool.cpp" />
     <ClCompile Include="..\..\Sources\transport.cpp" />
-    <ClCompile Include="..\..\Sources\udplistener.cpp" />
+    <ClCompile Include="..\..\Sources\unreliablelistener.cpp" />
     <ClCompile Include="..\..\Sources\udpstream.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

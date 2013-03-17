@@ -1,4 +1,4 @@
-#include "udplistener.h"
+#include "unreliablelistener.h"
 
 
 #include "stream.h"
@@ -13,19 +13,19 @@ namespace NetDuke
 {
 
 
-UDPListener::UDPListener()
+UnreliableListener::UnreliableListener()
 	: m_pool(50)
 	, m_stream(nullptr)
 {
 
 }
 
-UDPListener::~UDPListener()
+UnreliableListener::~UnreliableListener()
 {
 	Flush();
 }
 
-void UDPListener::Flush()
+void UnreliableListener::Flush()
 {
 	for(channels_t::iterator it=m_sendChannels.begin(); it != m_sendChannels.end(); ++it)
 	{
@@ -46,12 +46,12 @@ void UDPListener::Flush()
 	}
 }
 
-void UDPListener::Tick()
+void UnreliableListener::Tick()
 {
 	FlushSend();
 }
 
-void UDPListener::FlushSend()
+void UnreliableListener::FlushSend()
 {
 	assert(m_stream != nullptr);
 
@@ -69,14 +69,14 @@ void UDPListener::FlushSend()
 	}
 }
 
-void UDPListener::RegisterStream(Stream& _stream)
+void UnreliableListener::RegisterStream(Stream& _stream)
 {
 	assert(m_stream == nullptr);
 
 	m_stream = &_stream;
 }
 
-void UDPListener::UnRegisterStream(const Stream& _stream)
+void UnreliableListener::UnRegisterStream(const Stream& _stream)
 {
 	assert(m_stream != nullptr);
 	assert(m_stream->GetType() == _stream.GetType());
@@ -84,7 +84,7 @@ void UDPListener::UnRegisterStream(const Stream& _stream)
 	m_stream = nullptr;
 }
 
-netBool UDPListener::Pull(SerializerLess &_ser, Peer& _peer)
+netBool UnreliableListener::Pull(SerializerLess &_ser, Peer& _peer)
 {
 	bool is_pull = false;
 	for(channels_t::iterator it = m_recvChannels.begin(); it != m_recvChannels.end(); ++it)
@@ -102,7 +102,7 @@ netBool UDPListener::Pull(SerializerLess &_ser, Peer& _peer)
 	return is_pull;
 }
 
-netBool UDPListener::Push(SerializerLess &_ser, const Peer& _peer)
+netBool UnreliableListener::Push(SerializerLess &_ser, const Peer& _peer)
 {
 	assert(m_stream != nullptr);
 
@@ -110,6 +110,7 @@ netBool UDPListener::Push(SerializerLess &_ser, const Peer& _peer)
 
 	SerializerLess *back = channel.Back();
 
+	// bundling
 	if(channel.IsEmpty() || back->GetSize() + _ser.GetSize() > back->GetBufferSize())
 	{
 		SerializerLess ser(m_pool.GetSerializer());
@@ -129,7 +130,7 @@ netBool UDPListener::Push(SerializerLess &_ser, const Peer& _peer)
 }
 
 
-netBool UDPListener::Pack(SerializerLess& _ser, const Peer& _peer)
+netBool UnreliableListener::Pack(SerializerLess& _ser, const Peer& _peer)
 {
 	Channel& channel = GetChannel(m_sendChannels, _peer);
 
@@ -147,7 +148,7 @@ netBool UDPListener::Pack(SerializerLess& _ser, const Peer& _peer)
 	return true;
 }
 
-netBool UDPListener::UnPack(SerializerLess& _ser, const Peer& _peer)
+netBool UnreliableListener::UnPack(SerializerLess& _ser, const Peer& _peer)
 {
 	netBool is_valid = true;
 	if(_ser.Read(GetType()))
@@ -173,7 +174,7 @@ netBool UDPListener::UnPack(SerializerLess& _ser, const Peer& _peer)
 	return is_valid;
 }
 
-netBool UDPListener::PullFromStream(SerializerLess& _ser, const Peer& _peer)
+netBool UnreliableListener::PullFromStream(SerializerLess& _ser, const Peer& _peer)
 {
 	// read serializer type
 	netBool is_valid = _ser.Read(GetType());
@@ -188,7 +189,7 @@ netBool UDPListener::PullFromStream(SerializerLess& _ser, const Peer& _peer)
 	return is_valid;
 }
 
-Channel& UDPListener::GetChannel(channels_t& channels, const Peer& _peer)
+Channel& UnreliableListener::GetChannel(channels_t& channels, const Peer& _peer)
 {
 	channels_t::iterator it = channels.find(_peer);
 	Channel *channel_out = nullptr;

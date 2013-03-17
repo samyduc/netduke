@@ -45,7 +45,7 @@ void PingPongServer::Tick()
 	{
 		// pong
 		NetDuke::Serializer ser_copy(ser);
-		m_transport.Send(ser_copy, peer, NetDuke::s_typeUDPListener);
+		m_transport.Send(ser_copy, peer, NetDuke::s_typeReliableListener);
 
 		//delete ser.GetBuffer();
 		ser.ResetCursor();
@@ -81,11 +81,11 @@ void PingPongClient::Tick()
 		m_serializer.Close();
 
 		m_clock = clock();
+		
+		m_transport.Send(m_serializer, m_peer, NetDuke::s_typeReliableListener);
 		// force bundling
-		m_transport.Send(m_serializer, m_peer, NetDuke::s_typeUDPListener);
-
-		NetDuke::Serializer serializer(m_serializer);
-		m_transport.Send(serializer, m_peer, NetDuke::s_typeUDPListener);
+		//NetDuke::Serializer serializer(m_serializer);
+		//m_transport.Send(serializer, m_peer, NetDuke::s_typeReliableListener);
 	}
 	else
 	{

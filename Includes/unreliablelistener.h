@@ -16,15 +16,15 @@ class Channel;
 class SerializerLess;
 class Stream;
 
-class UDPListener : public Listener
+class UnreliableListener : public Listener
 {
 public:
 
-				UDPListener();
-				~UDPListener();
+				UnreliableListener();
+				~UnreliableListener();
 
 	void		Tick();
-	netU32		GetType() const { return s_typeUDPListener; } 
+	netU32		GetType() const { return s_typeUnreliableListener; } 
 
 	netBool		Pull(SerializerLess &_ser, Peer& _peer);
 	netBool		Push(SerializerLess &_ser, const Peer& _peer);
