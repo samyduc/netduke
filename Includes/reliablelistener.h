@@ -9,7 +9,7 @@
 #include "serializerpool.h"
 
 #include <list>
-#include <ctime>
+#include "timeplatform.h"
 
 #include <assert.h>
 
@@ -19,23 +19,26 @@ namespace NetDuke
 class Channel;
 class Stream;
 
+typedef netU16 ack_t;
+typedef netU16 seq_t;
+
 struct ReliableSendInfo
 {
-	ReliableSendInfo(netU16 _sequence, SerializerLess& _ser)
+	ReliableSendInfo(seq_t _sequence, SerializerLess& _ser)
 		: m_sequence(_sequence)
 		, m_ser(_ser)
 	{
-		m_emissionTime = clock();
+		m_emissionTime = Time::GetMsTime();
 	}
 
-	netU16			m_sequence;
-	clock_t			m_emissionTime;
+	seq_t			m_sequence;
+	timer_t			m_emissionTime;
 	SerializerLess	m_ser;
 };
 
 struct ReliableRecvInfo
 {
-	ReliableRecvInfo(netU16 _sequence, SerializerLess& _ser)
+	ReliableRecvInfo(seq_t _sequence, SerializerLess& _ser)
 		: m_ser(_ser)
 		, m_sequence(_sequence)
 	{
@@ -46,7 +49,7 @@ struct ReliableRecvInfo
 		return m_sequence < _cmp.m_sequence;
 	}
 
-	netU16			m_sequence;
+	seq_t			m_sequence;
 	SerializerLess	m_ser;
 };
 
@@ -56,15 +59,16 @@ struct PlayerReliableInfo
 	PlayerReliableInfo(const Peer& _peer)
 		: m_peer(_peer)
 		, m_currentSequence(1)
-		, m_currentAck(0)
-		, m_lastAck(0)
-		, m_ackWaitTime(0)
+		, m_sendAck(0)
+		, m_recvAck(0)
+		, m_ackRecvTime(0)
+		, m_ackSendTime(0)
 	{
 	}
 
 	netU16 AcquireSequence()
 	{
-		netU16 sequence = m_currentSequence;
+		seq_t sequence = m_currentSequence;
 		m_currentSequence++;
 
 		if(m_currentSequence == 0xFFFF)
@@ -77,37 +81,46 @@ struct PlayerReliableInfo
 
 	netU16 AcquireAck()
 	{
-		netU16 ack = m_lastAck;
-		m_currentAck = 0;
-		m_ackWaitTime = 0;
+		ack_t ack = m_recvAck;
 
 		return ack;
 	}
 
-	void IncAck()
+	void IncSendAck()
 	{
-		if(m_lastAck == 0xFFFF)
+		if(m_sendAck == 0xFFFF)
 		{
-			m_lastAck = 1;
-			m_currentAck = 1;
+			m_sendAck = 1;
 		}
 		else
 		{
-			++m_lastAck;
-			++m_currentAck;
+			++m_sendAck;
+		}
+	}
+
+	void IncRecvAck()
+	{
+		if(m_recvAck == 0xFFFF)
+		{
+			m_recvAck = 1;
+		}
+		else
+		{
+			++m_recvAck;
 		}
 
-		if(m_ackWaitTime == 0)
+		if(m_ackRecvTime == 0)
 		{
-			m_ackWaitTime = clock();
+			m_ackRecvTime = Time::GetMsTime();
 		}
 	}
 
 	Peer						m_peer;
-	netU16						m_currentSequence;
-	netU16						m_currentAck;
-	netU16						m_lastAck;
-	clock_t						m_ackWaitTime;
+	seq_t						m_currentSequence;
+	ack_t						m_sendAck;
+	ack_t						m_recvAck;
+	timer_t						m_ackSendTime;
+	timer_t						m_ackRecvTime;
 	std::list<ReliableSendInfo>	m_send;
 	std::list<ReliableRecvInfo>	m_recv;
 };
@@ -125,6 +138,8 @@ public:
 	void					Tick();
 	netU32					GetType() const { return s_typeReliableListener; } 
 
+	inline size_t			GetHeaderSize() const;
+
 	netBool					Pull(SerializerLess &_ser, Peer& _peer);
 	netBool					Push(SerializerLess &_ser, const Peer& _peer);
 
@@ -133,7 +148,7 @@ public:
 	void					RegisterStream(Stream& _stream);
 	void					UnRegisterStream(const Stream& _stream);
 
-	void					SetTimeOut(netU32 _ms);
+	void					SetTimeOut(timer_t _ms);
 
 protected:
 	netBool					Pack(SerializerLess& _ser, const Peer& _peer);
@@ -146,11 +161,11 @@ protected:
 	void					Flush();
 
 	PlayerReliableInfo_t&	GetReliableInfo(const Peer& _peer);
-	void					RecvAck(PlayerReliableInfo_t &_reliableInfo, netU16 _ack);
+	void					RecvAck(PlayerReliableInfo_t &_reliableInfo, ack_t _ack);
 	netBool					PreUnpack(SerializerLess& _ser, const Peer& _peer);
-	netBool					CompareSequence(PlayerReliableInfo_t &_reliableInfo, netU16 _sequence);
-	netBool					RecvSequence(PlayerReliableInfo_t &_reliableInfo, SerializerLess& _less, netU16 _sequence);
-	netBool					CheckTimeout(clock_t _start);
+	netBool					CompareSequence(PlayerReliableInfo_t &_reliableInfo, seq_t _sequence);
+	netBool					RecvSequence(PlayerReliableInfo_t &_reliableInfo, SerializerLess& _less, seq_t _sequence);
+	netBool					CheckTimeout(timer_t _start);
 
 	// helper
 	void					CreateBundle(Channel& _channel);
@@ -163,7 +178,7 @@ private:
 
 	reliableInfo_t	m_reliableInfo;
 
-	clock_t			m_maxClock;
+	timer_t			m_maxClock;
 	SerializerPool	m_pool;
 
 };

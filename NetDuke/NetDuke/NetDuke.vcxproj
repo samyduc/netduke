@@ -132,6 +132,7 @@
     <ClInclude Include="..\..\Includes\serializerpool.h" />
     <ClInclude Include="..\..\Includes\layer.h" />
     <ClInclude Include="..\..\Includes\stream.h" />
+    <ClInclude Include="..\..\Includes\timeplatform.h" />
     <ClInclude Include="..\..\Includes\transport.h" />
     <ClInclude Include="..\..\Includes\unreliablelistener.h" />
     <ClInclude Include="..\..\Includes\udpstream.h" />

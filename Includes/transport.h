@@ -34,6 +34,8 @@ public:
 	void				Tick();
 	netU32				GetType() const { return s_typeTransport; }
 
+	inline size_t		GetHeaderSize() const { return 0; }
+
 	// helper
 	void				Listen(const Peer &_peer);
 	Listener*			GetListener(netU32 _type) const;

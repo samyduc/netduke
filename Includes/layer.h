@@ -26,6 +26,8 @@ public:
 	virtual void		Tick() = 0;
 	virtual netU32		GetType() const = 0;
 
+	virtual inline size_t	GetHeaderSize() const = 0;
+
 	virtual netBool		Pull(SerializerLess &_ser, Peer& _peer) = 0;
 	virtual netBool		Push(SerializerLess &_ser, const Peer& _peer) = 0;
 

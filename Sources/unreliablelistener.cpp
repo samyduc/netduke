@@ -25,6 +25,11 @@ UnreliableListener::~UnreliableListener()
 	Flush();
 }
 
+size_t UnreliableListener::GetHeaderSize() const
+{
+	return m_stream->GetHeaderSize() + Serializer::GetHeaderSize();
+}
+
 void UnreliableListener::Flush()
 {
 	for(channels_t::iterator it=m_sendChannels.begin(); it != m_sendChannels.end(); ++it)

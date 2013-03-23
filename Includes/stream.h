@@ -19,7 +19,6 @@ class Stream : public Layer
 public:
 
 	virtual void			CreateAndBind() = 0;
-	virtual inline size_t	GetHeaderSize() const = 0;
 
 	virtual netBool			IsValid() const = 0;
 	virtual const Peer&		GetPeer() const = 0;

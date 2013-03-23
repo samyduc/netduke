@@ -47,9 +47,7 @@ void PingPongServer::Tick()
 		NetDuke::Serializer ser_copy(ser);
 		m_transport.Send(ser_copy, peer, NetDuke::s_typeReliableListener);
 
-		//delete ser.GetBuffer();
 		ser.ResetCursor();
-		//ser.DecRef();
 	}
 }
 

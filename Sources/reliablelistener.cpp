@@ -16,12 +16,17 @@ ReliableListener::ReliableListener()
 	: m_pool(50)
 	, m_stream(nullptr)
 {
-	SetTimeOut(5000);
+	SetTimeOut(20000);
 }
 
 ReliableListener::~ReliableListener()
 {
 	Flush();
+}
+
+size_t ReliableListener::GetHeaderSize() const
+{
+	return m_stream->GetHeaderSize() + Serializer::GetHeaderSize() + sizeof(seq_t) + sizeof(ack_t);
 }
 
 void ReliableListener::Flush()
@@ -66,27 +71,47 @@ void ReliableListener::FlushSend()
 			SerializerLess ser;
 			channel.Pop(ser);
 
-			// push serializer to ack wait
-			PlayerReliableInfo_t& reliableInfo = GetReliableInfo(peer);
-			netU16 sequence = reliableInfo.AcquireSequence();
-
-			// write ack number
 			SerializerLess stream_ser(ser, m_stream->GetHeaderSize(), ser.GetBufferSize());
 			size_t stream_size = stream_ser.GetSize();
-			stream_ser.Write(GetType());
-			static_cast<Serializer&>(stream_ser) << sequence;
+
+			seq_t sequence;
+			ack_t ack;
+
+			netBool is_ok = stream_ser.Read(GetType());
+			assert(is_ok);
+			static_cast<Serializer&>(stream_ser) >> sequence;
+			static_cast<Serializer&>(stream_ser) >> ack;
+			stream_ser.Close();
+
+			PlayerReliableInfo_t& reliableInfo = GetReliableInfo(peer);
+
+			is_ok = stream_ser.Write(GetType());
+			assert(is_ok);
+			// if it is not a retransmission, do not change the sequence number
+			if(sequence == 0 && ser.GetSize() != GetHeaderSize())
+			{
+				static_cast<Serializer&>(stream_ser) << reliableInfo.AcquireSequence();
+			}
+			else
+			{
+				static_cast<Serializer&>(stream_ser) << sequence;
+			}
 			static_cast<Serializer&>(stream_ser) << reliableInfo.AcquireAck();
 			stream_ser.SetCursor(stream_size);
 			stream_ser.Close();
-
+			
 			// compute new size
 			ser.Write(m_stream->GetType());
 			ser.SetCursor(m_stream->GetHeaderSize() + stream_size);
 			ser.Close();
 
-			reliableInfo.m_send.push_back(struct ReliableSendInfo(sequence, ser));
-
 			m_stream->Push(ser, peer);
+
+			if(ser.GetSize() != GetHeaderSize())
+			{
+				// only wait ack if not a pure ack packet
+				reliableInfo.m_send.push_back(struct ReliableSendInfo(sequence, ser));
+			}
 		}
 	}
 }
@@ -106,9 +131,9 @@ void ReliableListener::UnRegisterStream(const Stream& _stream)
 	m_stream = nullptr;
 }
 
-netBool ReliableListener::CheckTimeout(clock_t _start)
+netBool ReliableListener::CheckTimeout(netU64 _start)
 {
-	clock_t time = clock() - _start;
+	netU64 time = Time::GetMsTime() - _start;
 
 	return time > m_maxClock;
 }
@@ -119,7 +144,7 @@ void ReliableListener::FlushTimeout()
 	{
 		PlayerReliableInfo_t &reliableInfo = (*it).second;
 		// check ack timeout
-		if(reliableInfo.m_ackWaitTime != 0 && CheckTimeout(reliableInfo.m_ackWaitTime + m_maxClock / 2))
+		if(reliableInfo.m_ackRecvTime != 0 && CheckTimeout(reliableInfo.m_ackRecvTime - m_maxClock / 2))
 		{
 			// force sending packet if needed for ack
 			Channel& channel = GetChannel(m_sendChannels, reliableInfo.m_peer);
@@ -128,8 +153,9 @@ void ReliableListener::FlushTimeout()
 			{
 				CreateBundle(channel);
 			}
+
 			// reset timer
-			reliableInfo.m_ackWaitTime = clock();
+			reliableInfo.m_ackRecvTime = 0;
 		}
 
 		// check expired packet
@@ -179,11 +205,11 @@ void ReliableListener::CreateBundle(Channel& _channel)
 	SerializerLess stream_ser(ser, m_stream->GetHeaderSize(), ser.GetBufferSize());
 	stream_ser.Write(GetType());
 	// sequence number, ack number
-	stream_ser << static_cast<netU16>(0);
-	stream_ser << static_cast<netU16>(0);
+	stream_ser << static_cast<seq_t>(0);
+	stream_ser << static_cast<ack_t>(0);
 	stream_ser.Close();
 
-	ser.SetCursor(ser.GetCursor() + stream_ser.GetSize());
+	ser.SetCursor(m_stream->GetHeaderSize() + stream_ser.GetSize());
 	ser.Close();
 	_channel.Push(ser);
 }
@@ -212,6 +238,9 @@ netBool ReliableListener::Pack(SerializerLess& _ser, const Peer& _peer)
 
 	assert(!channel.IsEmpty());
 	SerializerLess& ser = *channel.Front();
+
+	ser.Write(m_stream->GetType());
+
 	SerializerLess listener_ser(ser, m_stream->GetHeaderSize(), ser.GetBufferSize());
 	size_t listener_size = listener_ser.GetSize();
 
@@ -220,6 +249,9 @@ netBool ReliableListener::Pack(SerializerLess& _ser, const Peer& _peer)
 
 	listener_ser << _ser;
 	listener_ser.Close();
+
+	ser.SetCursor(m_stream->GetHeaderSize() + listener_ser.GetSize());
+	ser.Close();
 
 	return true;
 }
@@ -232,8 +264,8 @@ netBool ReliableListener::PreUnpack(SerializerLess& _ser, const Peer& _peer)
 		PlayerReliableInfo_t& reliableInfo = GetReliableInfo(_peer);
 
 		// unpack header first
-		netU16 sequence;
-		netU16 ack;
+		seq_t sequence;
+		ack_t ack;
 
 		static_cast<Serializer&>(_ser) >> sequence;
 		static_cast<Serializer&>(_ser) >> ack;
@@ -257,8 +289,8 @@ netBool ReliableListener::UnPack(SerializerLess& _ser, const Peer& _peer)
 		Channel& channel = GetChannel(m_recvChannels, _peer);
 
 		// unpack header first
-		netU16 sequence;
-		netU16 ack;
+		seq_t sequence;
+		ack_t ack;
 
 		static_cast<Serializer&>(_ser) >> sequence;
 		static_cast<Serializer&>(_ser) >> ack;
@@ -296,26 +328,27 @@ netBool ReliableListener::PullFromStream(SerializerLess& _ser, const Peer& _peer
 	return is_valid;
 }
 
-netBool ReliableListener::CompareSequence(PlayerReliableInfo_t &_reliableInfo, netU16 _sequence)
+netBool ReliableListener::CompareSequence(PlayerReliableInfo_t &_reliableInfo, seq_t _sequence)
 {
+	// note : a _sequence = 0 means pure ack, so it cannot be ordered
 	netBool is_ordered = false;
 
 	// warning in case of cycling number !
-	if(_reliableInfo.m_lastAck == 0xFFFF && _sequence == 1)
+	if(_reliableInfo.m_recvAck == 0xFFFF && _sequence == 1)
 	{
 		is_ordered = true;
-		_reliableInfo.IncAck();
+		_reliableInfo.IncRecvAck();
 	}
-	else if(_reliableInfo.m_lastAck+1 == _sequence)
+	else if(_reliableInfo.m_recvAck+1 == _sequence)
 	{
 		is_ordered = true;
-		_reliableInfo.IncAck();
+		_reliableInfo.IncRecvAck();
 	}
 
 	return is_ordered;
 }
 
-netBool ReliableListener::RecvSequence(PlayerReliableInfo_t &_reliableInfo, SerializerLess& _ser, netU16 _sequence)
+netBool ReliableListener::RecvSequence(PlayerReliableInfo_t &_reliableInfo, SerializerLess& _ser, seq_t _sequence)
 {
 	netBool is_ordered = CompareSequence(_reliableInfo, _sequence);
 	
@@ -344,8 +377,8 @@ netBool ReliableListener::RecvSequence(PlayerReliableInfo_t &_reliableInfo, Seri
 	}
 	else
 	{
-		// special case, if pure ack, do not wait an additional case for it
-		if(_ser.GetCursor() != _ser.GetSize())
+		// special case, if not pure ack, wait an additional time for it
+		if(_sequence != 0)
 		{
 			_ser.Close();
 			_reliableInfo.m_recv.push_front(struct ReliableRecvInfo(_sequence, _ser));
@@ -355,7 +388,7 @@ netBool ReliableListener::RecvSequence(PlayerReliableInfo_t &_reliableInfo, Seri
 	return is_ordered;
 }
 
-void ReliableListener::RecvAck(PlayerReliableInfo_t &_reliableInfo, netU16 _ack)
+void ReliableListener::RecvAck(PlayerReliableInfo_t &_reliableInfo, ack_t _ack)
 {
 	if(_ack != 0)
 	{
@@ -372,6 +405,12 @@ void ReliableListener::RecvAck(PlayerReliableInfo_t &_reliableInfo, netU16 _ack)
 			{
 				++it;
 			}
+		}
+
+		// if no more ack to receive -> equivalent to _reliableInfo.m_lastAck-1 == _ack
+		if(_reliableInfo.m_send.empty())
+		{
+			_reliableInfo.m_ackRecvTime = 0;
 		}
 	}
 }
@@ -415,9 +454,9 @@ PlayerReliableInfo_t& ReliableListener::GetReliableInfo(const Peer& _peer)
 	return *reliableInfo_out;
 }
 
-void ReliableListener::SetTimeOut(netU32 _ms)
+void ReliableListener::SetTimeOut(timer_t _ms)
 {
-	m_maxClock = (_ms/1000) * CLOCKS_PER_SEC;
+	m_maxClock = _ms;
 }
 
 
