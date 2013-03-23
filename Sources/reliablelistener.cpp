@@ -337,12 +337,12 @@ netBool ReliableListener::CompareSequence(PlayerReliableInfo_t &_reliableInfo, s
 	if(_reliableInfo.m_recvAck == 0xFFFF && _sequence == 1)
 	{
 		is_ordered = true;
-		_reliableInfo.IncRecvAck();
+		_reliableInfo.IncAck();
 	}
 	else if(_reliableInfo.m_recvAck+1 == _sequence)
 	{
 		is_ordered = true;
-		_reliableInfo.IncRecvAck();
+		_reliableInfo.IncAck();
 	}
 
 	return is_ordered;

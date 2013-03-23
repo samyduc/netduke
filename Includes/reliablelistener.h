@@ -59,10 +59,8 @@ struct PlayerReliableInfo
 	PlayerReliableInfo(const Peer& _peer)
 		: m_peer(_peer)
 		, m_currentSequence(1)
-		, m_sendAck(0)
 		, m_recvAck(0)
 		, m_ackRecvTime(0)
-		, m_ackSendTime(0)
 	{
 	}
 
@@ -86,19 +84,7 @@ struct PlayerReliableInfo
 		return ack;
 	}
 
-	void IncSendAck()
-	{
-		if(m_sendAck == 0xFFFF)
-		{
-			m_sendAck = 1;
-		}
-		else
-		{
-			++m_sendAck;
-		}
-	}
-
-	void IncRecvAck()
+	void IncAck()
 	{
 		if(m_recvAck == 0xFFFF)
 		{
@@ -117,9 +103,7 @@ struct PlayerReliableInfo
 
 	Peer						m_peer;
 	seq_t						m_currentSequence;
-	ack_t						m_sendAck;
 	ack_t						m_recvAck;
-	timer_t						m_ackSendTime;
 	timer_t						m_ackRecvTime;
 	std::list<ReliableSendInfo>	m_send;
 	std::list<ReliableRecvInfo>	m_recv;
