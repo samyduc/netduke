@@ -4,14 +4,12 @@
 #include "peer.h"
 #include "serializerless.h"
 
-#include <mutex>
 #include <queue>
 
 namespace NetDuke
 {
 
 class Serializer;
-//class SerializerLess;
 
 class Channel
 {
@@ -19,7 +17,6 @@ public:
 	explicit Channel(const Peer& _peer);
 	~Channel() {}
 
-	//void				PushCopy(const Serializer& _serializer);
 	void				Push(Serializer& _serializer);
 	void				Push(SerializerLess& _serializer);
 	netBool				Pop(SerializerLess& _ser);

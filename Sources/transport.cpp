@@ -10,6 +10,7 @@
 #include "peer.h"
 #include "channel.h"
 
+#include <mutex>
 
 namespace NetDuke
 {

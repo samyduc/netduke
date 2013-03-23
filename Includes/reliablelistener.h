@@ -144,6 +144,8 @@ protected:
 	void					FlushTimeout();
 	void					Flush();
 
+	void					SendToStream(SerializerLess& _ser, const Peer &_peer);
+
 	PlayerReliableInfo_t&	GetReliableInfo(const Peer& _peer);
 	void					RecvAck(PlayerReliableInfo_t &_reliableInfo, ack_t _ack);
 	netBool					PreUnpack(SerializerLess& _ser, const Peer& _peer);

@@ -71,49 +71,54 @@ void ReliableListener::FlushSend()
 			SerializerLess ser;
 			channel.Pop(ser);
 
-			SerializerLess stream_ser(ser, m_stream->GetHeaderSize(), ser.GetBufferSize());
-			size_t stream_size = stream_ser.GetSize();
-
-			seq_t sequence;
-			ack_t ack;
-
-			netBool is_ok = stream_ser.Read(GetType());
-			assert(is_ok);
-			static_cast<Serializer&>(stream_ser) >> sequence;
-			static_cast<Serializer&>(stream_ser) >> ack;
-			stream_ser.Close();
-
-			PlayerReliableInfo_t& reliableInfo = GetReliableInfo(peer);
-
-			is_ok = stream_ser.Write(GetType());
-			assert(is_ok);
-			// if it is not a retransmission, do not change the sequence number
-			if(sequence == 0 && ser.GetSize() != GetHeaderSize())
-			{
-				static_cast<Serializer&>(stream_ser) << reliableInfo.AcquireSequence();
-			}
-			else
-			{
-				static_cast<Serializer&>(stream_ser) << sequence;
-			}
-			static_cast<Serializer&>(stream_ser) << reliableInfo.AcquireAck();
-			stream_ser.SetCursor(stream_size);
-			stream_ser.Close();
-			
-			// compute new size
-			ser.Write(m_stream->GetType());
-			ser.SetCursor(m_stream->GetHeaderSize() + stream_size);
-			ser.Close();
-
-			m_stream->Push(ser, peer);
-
-			if(ser.GetSize() != GetHeaderSize())
-			{
-				// only wait ack if not a pure ack packet
-				reliableInfo.m_send.push_back(struct ReliableSendInfo(sequence, ser));
-			}
+			SendToStream(ser, peer);
 		}
 	}
+}
+
+void ReliableListener::SendToStream(SerializerLess& _ser, const Peer &_peer)
+{
+		SerializerLess stream_ser(_ser, m_stream->GetHeaderSize(), _ser.GetBufferSize());
+		size_t stream_size = stream_ser.GetSize();
+
+		seq_t sequence;
+		ack_t ack;
+
+		netBool is_ok = stream_ser.Read(GetType());
+		assert(is_ok);
+		static_cast<Serializer&>(stream_ser) >> sequence;
+		static_cast<Serializer&>(stream_ser) >> ack;
+		stream_ser.Close();
+
+		PlayerReliableInfo_t& reliableInfo = GetReliableInfo(_peer);
+
+		is_ok = stream_ser.Write(GetType());
+		assert(is_ok);
+		// if it is not a retransmission, do not change the sequence number
+		if(sequence == 0 && _ser.GetSize() != GetHeaderSize())
+		{
+			static_cast<Serializer&>(stream_ser) << reliableInfo.AcquireSequence();
+		}
+		else
+		{
+			static_cast<Serializer&>(stream_ser) << sequence;
+		}
+		static_cast<Serializer&>(stream_ser) << reliableInfo.AcquireAck();
+		stream_ser.SetCursor(stream_size);
+		stream_ser.Close();
+			
+		// compute new size
+		_ser.Write(m_stream->GetType());
+		_ser.SetCursor(m_stream->GetHeaderSize() + stream_size);
+		_ser.Close();
+
+		m_stream->Push(_ser, _peer);
+
+		if(_ser.GetSize() != GetHeaderSize())
+		{
+			// only wait ack if not a pure ack packet
+			reliableInfo.m_send.push_back(struct ReliableSendInfo(sequence, _ser));
+		}
 }
 
 void ReliableListener::RegisterStream(Stream& _stream)
@@ -167,7 +172,10 @@ void ReliableListener::FlushTimeout()
 			if(CheckTimeout(sendInfo.m_emissionTime))
 			{
 				// send back
-				Push(sendInfo.m_ser, reliableInfo.m_peer);
+				//Push(sendInfo.m_ser, reliableInfo.m_peer);
+
+				// direct mode, no bundling
+				SendToStream(sendInfo.m_ser, reliableInfo.m_peer);
 				iter = reliableInfo.m_send.erase(iter);
 			}
 			else

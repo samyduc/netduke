@@ -11,25 +11,15 @@ Channel::Channel(const Peer& _peer)
 {
 }
 
-/*void Channel::PushCopy(const Serializer& _serializer)
-{
-	// TODO : for debug only
-	Serializer* ser = new Serializer(_serializer);
-	ser->IncRef();
-	m_serializers.push(ser);
-}*/
-
 void Channel::Push(Serializer& _serializer)
 {
-	//_serializer.IncRef();
 	_serializer.ResetCursor();
-	//_serializer.IncRef();
 	m_serializers.push(_serializer);
 }
 
 void Channel::Push(SerializerLess& _serializer)
 {
-	//_serializer.IncRef();
+	_serializer.ResetCursor();
 	m_serializers.push(_serializer);
 }
 
@@ -41,6 +31,7 @@ netBool Channel::Pop(SerializerLess& _ser)
 	{
 		_ser = m_serializers.back();
 		m_serializers.pop();
+		_ser.ResetCursor();
 	}
 	else
 	{
@@ -83,6 +74,7 @@ SerializerLess*	Channel::Front()
 	if(!m_serializers.empty())
 	{
 		ser = &m_serializers.front();
+		ser->ResetCursor();
 	}
 
 	return ser;
@@ -95,6 +87,7 @@ SerializerLess*	Channel::Back()
 	if(!m_serializers.empty())
 	{
 		ser = &m_serializers.front();
+		ser->ResetCursor();
 	}
 
 	return ser;
