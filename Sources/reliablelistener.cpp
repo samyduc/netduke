@@ -11,12 +11,13 @@
 namespace NetDuke
 {
 
+static ack_t s_fakeWindow = 10;
 
 ReliableListener::ReliableListener()
 	: m_pool(50)
 	, m_stream(nullptr)
 {
-	SetTimeOut(20000);
+	SetTimeOut(5000);
 }
 
 ReliableListener::~ReliableListener()
@@ -94,15 +95,13 @@ void ReliableListener::SendToStream(SerializerLess& _ser, const Peer &_peer)
 
 		is_ok = stream_ser.Write(GetType());
 		assert(is_ok);
-		// if it is not a retransmission, do not change the sequence number
+		// if it is a retransmission, do not change the sequence number
 		if(sequence == 0 && _ser.GetSize() != GetHeaderSize())
 		{
-			static_cast<Serializer&>(stream_ser) << reliableInfo.AcquireSequence();
+			sequence = reliableInfo.AcquireSequence();	
 		}
-		else
-		{
-			static_cast<Serializer&>(stream_ser) << sequence;
-		}
+
+		static_cast<Serializer&>(stream_ser) << sequence;
 		static_cast<Serializer&>(stream_ser) << reliableInfo.AcquireAck();
 		stream_ser.SetCursor(stream_size);
 		stream_ser.Close();
@@ -396,6 +395,28 @@ netBool ReliableListener::RecvSequence(PlayerReliableInfo_t &_reliableInfo, Seri
 	return is_ordered;
 }
 
+netBool ReliableListener::CompareAck(seq_t _seq, ack_t _lastAck)
+{
+	netBool is_ack = false;
+	//sendInfo.m_sequence <= _ack
+
+	if(_lastAck <= s_fakeWindow)
+	{
+		ack_t diff = 0xFFFF - s_fakeWindow + _lastAck;
+
+		if( _seq <= _lastAck || _seq >= diff)
+		{
+			is_ack = true;
+		}
+	}
+	else if(_seq <= _lastAck)
+	{
+		is_ack = true;
+	}
+
+	return is_ack;
+}
+
 void ReliableListener::RecvAck(PlayerReliableInfo_t &_reliableInfo, ack_t _ack)
 {
 	if(_ack != 0)
@@ -404,9 +425,8 @@ void ReliableListener::RecvAck(PlayerReliableInfo_t &_reliableInfo, ack_t _ack)
 		while(it != _reliableInfo.m_send.end())
 		{
 			struct ReliableSendInfo& sendInfo = (*it);
-			if(sendInfo.m_sequence <= _ack)
+			if(CompareAck(sendInfo.m_sequence, _ack))
 			{
-				// remove
 				it = _reliableInfo.m_send.erase(it);
 			}
 			else
@@ -416,10 +436,10 @@ void ReliableListener::RecvAck(PlayerReliableInfo_t &_reliableInfo, ack_t _ack)
 		}
 
 		// if no more ack to receive -> equivalent to _reliableInfo.m_lastAck-1 == _ack
-		if(_reliableInfo.m_send.empty())
+		/*if(_reliableInfo.m_send.empty())
 		{
 			_reliableInfo.m_ackRecvTime = 0;
-		}
+		}*/
 	}
 }
 

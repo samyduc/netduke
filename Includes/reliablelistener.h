@@ -67,11 +67,14 @@ struct PlayerReliableInfo
 	netU16 AcquireSequence()
 	{
 		seq_t sequence = m_currentSequence;
-		m_currentSequence++;
 
 		if(m_currentSequence == 0xFFFF)
 		{
 			m_currentSequence = 1;
+		}
+		else
+		{
+			++m_currentSequence;
 		}
 
 		return sequence;
@@ -150,6 +153,7 @@ protected:
 	void					RecvAck(PlayerReliableInfo_t &_reliableInfo, ack_t _ack);
 	netBool					PreUnpack(SerializerLess& _ser, const Peer& _peer);
 	netBool					CompareSequence(PlayerReliableInfo_t &_reliableInfo, seq_t _sequence);
+	netBool					CompareAck(seq_t _seq, ack_t _lastAck);
 	netBool					RecvSequence(PlayerReliableInfo_t &_reliableInfo, SerializerLess& _less, seq_t _sequence);
 	netBool					CheckTimeout(timer_t _start);
 
