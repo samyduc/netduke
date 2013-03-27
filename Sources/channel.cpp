@@ -86,7 +86,7 @@ SerializerLess*	Channel::Back()
 
 	if(!m_serializers.empty())
 	{
-		ser = &m_serializers.front();
+		ser = &m_serializers.back();
 		ser->ResetCursor();
 	}
 

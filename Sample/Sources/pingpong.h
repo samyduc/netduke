@@ -37,6 +37,8 @@ private:
 	NetDuke::Serializer m_serializer;
 	NetDuke::Transport m_transport;
 
+	NetDuke::netU32 m_round;
+
 	bool m_state;
 };
 

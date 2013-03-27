@@ -54,6 +54,7 @@ void PingPongServer::Tick()
 PingPongClient::PingPongClient(NetDuke::netChar* _addr, NetDuke::netU16 _port)
 	: m_serializer(NetDuke::Serializer::MTU)
 	, m_state(false)
+	, m_round(0)
 {
 	m_transport.InitPlatform();
 
@@ -75,7 +76,7 @@ void PingPongClient::Tick()
 		m_state = true;
 		m_serializer.ResetCursor();
 		m_serializer.Write("pingpong");
-		m_serializer << 12;
+		m_serializer << m_round;
 		m_serializer.Close();
 
 		m_clock = clock();
@@ -95,19 +96,29 @@ void PingPongClient::Tick()
 
 		while(m_transport.Pull(ser, peer))
 		{		
-			if(ser.GetRef() != 1)
-			{
-				int a = 2;
-				(void)a;
-			}
 			m_state = false;
+
+			NetDuke::netU32 round;
+			NetDuke::netBool ret = m_serializer.Read("pingpong");
+			assert(ret);
+
+			m_serializer >> round;
+			m_serializer.Close();
+
+			assert(round == m_round);
+
+			if(m_round == 0xFFFFFFFF)
+			{
+				m_round = 0;
+			}
+			else
+			{
+				++m_round;
+			}
 			// log recv
 			std::lock_guard<std::mutex> gLock(g_globalLock);
 			std::thread::id id = std::this_thread::get_id();
 			printf("threadId:%llu, clicks :%llu clicks seconds :%f \n", id, interval, ((double)interval)/CLOCKS_PER_SEC);
-			// do not do this (the uffer can be shared by multiple location
-			//delete ser.GetBuffer();
-			//ser.DecRef();
 		}
 
 		/*if(interval > 1000)
