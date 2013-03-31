@@ -1,0 +1,17 @@
+# Scons
+# NetDuke by Samy Duc
+
+Import("env")
+
+
+# NETDUKE
+netduke_name = "netduke"
+
+lib = env.SharedLibrary(netduke_name, Glob("Sources/*.cpp"))
+
+# SAMPLE
+sample_name = "sample"
+sample = env.Program(sample_name, Glob("Sample/Sources/*.cpp"), LIBS=['netduke', "Ws2_32.lib"], LIBPATH='.')
+
+env.Install("lib", lib)
+env.Install("lib", sample)
