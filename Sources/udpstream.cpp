@@ -115,12 +115,6 @@ void UDPStream::RecvFrom()
 					&fromlen
 				);
 
-	if(len == -1)
-	{
-		int err = WSAGetLastError();
-		(void)err;
-	}
-
 	if(len > 0)
 	{
 		SerializerLess serLess(ser);

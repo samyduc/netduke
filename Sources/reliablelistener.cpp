@@ -11,7 +11,7 @@
 namespace NetDuke
 {
 
-static ack_t s_fakeWindow = 10;
+static const ack_t s_fakeWindow = 10;
 
 ReliableListener::ReliableListener()
 	: m_pool(50)
@@ -265,7 +265,7 @@ netBool ReliableListener::Pack(SerializerLess& _ser, const Peer& _peer)
 
 netBool ReliableListener::PreUnpack(SerializerLess& _ser, const Peer& _peer)
 {
-	netBool is_valid = true;
+	netBool is_valid = false;
 	if(_ser.Read(GetType()))
 	{
 		PlayerReliableInfo_t& reliableInfo = GetReliableInfo(_peer);
@@ -279,10 +279,8 @@ netBool ReliableListener::PreUnpack(SerializerLess& _ser, const Peer& _peer)
 
 		RecvAck(reliableInfo, ack);
 		RecvSequence(reliableInfo, _ser, sequence);
-	}
-	else
-	{
-		is_valid = false;
+
+		is_valid = true;
 	}
 
 	return is_valid;
@@ -290,7 +288,7 @@ netBool ReliableListener::PreUnpack(SerializerLess& _ser, const Peer& _peer)
 
 netBool ReliableListener::UnPack(SerializerLess& _ser, const Peer& _peer)
 {
-	netBool is_valid = true;
+	netBool is_valid = false;
 	if(_ser.Read(GetType()))
 	{
 		Channel& channel = GetChannel(m_recvChannels, _peer);
@@ -311,10 +309,7 @@ netBool ReliableListener::UnPack(SerializerLess& _ser, const Peer& _peer)
 		}
 
 		_ser.Close();
-	}
-	else
-	{
-		is_valid = false;
+		is_valid = true;
 	}
 
 	return is_valid;
@@ -367,18 +362,16 @@ netBool ReliableListener::RecvSequence(PlayerReliableInfo_t &_reliableInfo, Seri
 
 		// check if we fill a hole
 		_reliableInfo.m_recv.sort();
+		netBool is_contiguous = true;
 		std::list<ReliableRecvInfo>::iterator iter = _reliableInfo.m_recv.begin();
-		while(iter != _reliableInfo.m_recv.end())
+		while(is_contiguous && iter != _reliableInfo.m_recv.end())
 		{
 			struct ReliableRecvInfo& cmp = (*iter);
-			if(CompareSequence(_reliableInfo, cmp.m_sequence))
+			is_contiguous = CompareSequence(_reliableInfo, cmp.m_sequence);
+			if(is_contiguous)
 			{
 				UnPack(cmp.m_ser, _reliableInfo.m_peer);
 				iter = _reliableInfo.m_recv.erase(iter);
-			}
-			else
-			{
-				break;
 			}
 		}
 	}
