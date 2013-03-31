@@ -6,7 +6,7 @@
 #include "reliablelistener.h"
 #include "udpstream.h"
 #include "serializer.h"
-#include "serializerLess.h"
+#include "serializerless.h"
 #include "peer.h"
 #include "channel.h"
 
@@ -184,6 +184,19 @@ bool Transport::DesInitPlatformPrivate()
 	WSACleanup();
 	return true;
 }
+
+#else
+// default
+bool Transport::InitPlatformPrivate()
+{
+	return true;
+}
+ 
+bool Transport::DesInitPlatformPrivate()
+{
+	return true;
+}
+
 #endif
 
 };

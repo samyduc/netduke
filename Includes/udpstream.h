@@ -8,17 +8,13 @@
 #include "channel.h"
 #include "peer.h"
 #include "serializer.h"
-#include "serializerLess.h"
+#include "serializerless.h"
 
 #include "serializerpool.h"
 
 #include <map>
 #include <list>
 
-#ifdef _WIN32
-	#include <winsock2.h>
-	#include <ws2tcpip.h>
-#endif
 
 namespace NetDuke
 {

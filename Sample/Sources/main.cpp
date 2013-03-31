@@ -7,6 +7,11 @@
 #include <thread>
 #include <list>
 
+#if !defined(_WIN32)
+	#include <unistd.h>
+	#define Sleep sleep
+#endif
+
 void threaded_server()
 {
 	NetDukeSample::PingPongServer server(15002);

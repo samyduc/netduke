@@ -1,6 +1,11 @@
 #include "serializer.h"
-#include "serializerLess.h"
+#include "serializerless.h"
 #include "crc.h"
+
+#if !defined(_WIN32)
+	// memcpy
+	#include <cstring>
+#endif
 
 namespace NetDuke
 {

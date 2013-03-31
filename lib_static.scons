@@ -1,5 +1,6 @@
 # Scons
 # NetDuke by Samy Duc
+import platform
 
 Import("env")
 
@@ -9,9 +10,14 @@ netduke_name = "netduke"
 
 lib = env.StaticLibrary(netduke_name, Glob("Sources/*.cpp"))
 
+LINK_WITH = ['netduke']
+
+if platform.system() == 'Windows':
+	LINK_WITH.append("Ws2_32.lib")
+
 # SAMPLE
 sample_name = "sample"
-sample = env.Program(sample_name, Glob("Sample/Sources/*.cpp"), LIBS=['netduke', "Ws2_32.lib"], LIBPATH='.')
+sample = env.Program(sample_name, Glob("Sample/Sources/*.cpp"), LIBS=LINK_WITH, LIBPATH='.')
 
 #env.Install("../../lib", lib)
 #env.Install("../../lib", sample)

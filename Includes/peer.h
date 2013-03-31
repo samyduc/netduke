@@ -2,9 +2,19 @@
 
 #include "netdef.h"
 
-#ifdef _WIN32
+#if defined(_WIN32)
 	#include <winsock2.h>
 	#include <ws2tcpip.h>
+#elif defined(__GNUC__)
+	#include <sys/socket.h>
+	#include <netinet/in.h>
+	#include <arpa/inet.h>
+	#include <unistd.h>
+	#define SOCKADDR struct sockaddr	
+	#define SOCKADDR_IN struct sockaddr_in
+	#define SOCKET int	
+#else
+	#error "no include for socket !"
 #endif
 
 namespace NetDuke

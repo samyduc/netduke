@@ -22,8 +22,12 @@ UDPStream::UDPStream(const Peer& _peer)
 UDPStream::~UDPStream()
 {
 	Flush();
-
+	
+#if defined(_WIN32)
 	closesocket(m_socket);
+#else
+	close(m_socket);
+#endif
 }
 
 void UDPStream::Tick()
@@ -141,7 +145,7 @@ void UDPStream::CreateAndBind()
 	assert(err == 0);
 
 	// overwrite port (if automatic attribution)
-	int native_size = sizeof(native_addr);
+	socklen_t native_size = sizeof(native_addr);
 	err = getsockname(m_socket, (struct sockaddr *)&native_addr, &native_size);
 
 	m_isValid = (m_socket != 0);

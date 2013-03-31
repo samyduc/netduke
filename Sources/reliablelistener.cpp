@@ -116,7 +116,8 @@ void ReliableListener::SendToStream(SerializerLess& _ser, const Peer &_peer)
 		if(_ser.GetSize() != GetHeaderSize())
 		{
 			// only wait ack if not a pure ack packet
-			reliableInfo.m_send.push_back(struct ReliableSendInfo(sequence, _ser));
+			struct ReliableSendInfo sendInfo(sequence, _ser);
+			reliableInfo.m_send.push_back(sendInfo);
 		}
 }
 
@@ -381,7 +382,8 @@ netBool ReliableListener::RecvSequence(PlayerReliableInfo_t &_reliableInfo, Seri
 		if(_sequence != 0)
 		{
 			_ser.Close();
-			_reliableInfo.m_recv.push_front(struct ReliableRecvInfo(_sequence, _ser));
+			struct ReliableRecvInfo recvInfo(_sequence, _ser);
+			_reliableInfo.m_recv.push_front(recvInfo);
 		}
 	}
 

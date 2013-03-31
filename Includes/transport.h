@@ -8,10 +8,6 @@
 
 #include <list>
 
-#ifdef _WIN32
-	#include <winsock2.h>
-	#include <ws2tcpip.h>
-#endif
 
 namespace NetDuke
 {
@@ -53,10 +49,8 @@ private:
 	listeners_t m_listeners;
 	streams_t	m_streams;
 
-#if defined(_WIN32)
 	bool				InitPlatformPrivate();
 	bool				DesInitPlatformPrivate();
-#endif
 
 };
 
