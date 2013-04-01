@@ -2,10 +2,10 @@
 
 #include "netdef.h"
 
-#if defined(_WIN32)
+#if defined(WINDOWS_TARGET)
 	#include <winsock2.h>
 	#include <ws2tcpip.h>
-#elif defined(__GNUC__)
+#elif defined(LINUX_TARGET)
 	#include <sys/socket.h>
 	#include <netinet/in.h>
 	#include <arpa/inet.h>

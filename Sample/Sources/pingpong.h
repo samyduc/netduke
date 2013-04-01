@@ -1,8 +1,6 @@
 #pragma once
 
-#include "netdef.h"
-#include "transport.h"
-#include "serializer.h"
+#include "netduke.h"
 
 #include <ctime>
 

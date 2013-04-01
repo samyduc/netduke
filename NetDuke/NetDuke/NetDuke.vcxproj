@@ -82,6 +82,7 @@
       <AdditionalIncludeDirectories>..\..\Includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <BrowseInformation>true</BrowseInformation>
+      <PreprocessorDefinitions>WINDOWS_TARGET;WIN32_LEAN_AND_MEAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -112,6 +113,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>D:\dev\NetDuke\Includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ExceptionHandling>Sync</ExceptionHandling>
+      <PreprocessorDefinitions>WINDOWS_TARGET;WIN32_LEAN_AND_MEAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -125,6 +127,7 @@
     <ClInclude Include="..\..\Includes\crc.h" />
     <ClInclude Include="..\..\Includes\listener.h" />
     <ClInclude Include="..\..\Includes\netdef.h" />
+    <ClInclude Include="..\..\Includes\netduke.h" />
     <ClInclude Include="..\..\Includes\peer.h" />
     <ClInclude Include="..\..\Includes\reliablelistener.h" />
     <ClInclude Include="..\..\Includes\serializer.h" />
@@ -140,6 +143,26 @@
   <ItemGroup>
     <ClCompile Include="..\..\Sources\channel.cpp" />
     <ClCompile Include="..\..\Sources\crc.cpp" />
+    <ClCompile Include="..\..\Sources\linux\linux_peer.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">WINDOWS_LEAN_AND_MEAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\Sources\linux\linux_timeplatform.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">WINDOWS_LEAN_AND_MEAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\Sources\linux\linux_transport.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">WINDOWS_LEAN_AND_MEAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\Sources\linux\linux_udpstream.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">WINDOWS_LEAN_AND_MEAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\Sources\peer.cpp" />
     <ClCompile Include="..\..\Sources\reliablelistener.cpp" />
     <ClCompile Include="..\..\Sources\serializer.cpp" />
@@ -148,6 +171,10 @@
     <ClCompile Include="..\..\Sources\transport.cpp" />
     <ClCompile Include="..\..\Sources\unreliablelistener.cpp" />
     <ClCompile Include="..\..\Sources\udpstream.cpp" />
+    <ClCompile Include="..\..\Sources\windows\windows_peer.cpp" />
+    <ClCompile Include="..\..\Sources\windows\windows_timeplatform.cpp" />
+    <ClCompile Include="..\..\Sources\windows\windows_transport.cpp" />
+    <ClCompile Include="..\..\Sources\windows\windows_udpstream.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

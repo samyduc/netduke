@@ -23,24 +23,6 @@ Peer& Peer::operator=(const Peer &_peer)
 	return *this;
 }
 
-bool Peer::operator==(const Peer &_peer) const
-{
-#if defined(_WIN32)
-	return m_addr.sin_addr.S_un.S_addr == _peer.m_addr.sin_addr.S_un.S_addr && m_addr.sin_port == _peer.m_addr.sin_port;
-#else
-	return m_addr.sin_addr.s_addr == _peer.m_addr.sin_addr.s_addr && m_addr.sin_port == _peer.m_addr.sin_port;
-#endif
-}
-
-bool Peer::operator<(const Peer &_peer) const
-{
-#if defined(_WIN32)	
-	return m_addr.sin_addr.S_un.S_addr < _peer.m_addr.sin_addr.S_un.S_addr || (m_addr.sin_addr.S_un.S_addr == _peer.m_addr.sin_addr.S_un.S_addr && m_addr.sin_port < _peer.m_addr.sin_port);
-#else
-        return m_addr.sin_addr.s_addr < _peer.m_addr.sin_addr.s_addr || (m_addr.sin_addr.s_addr == _peer.m_addr.sin_addr.s_addr && m_addr.sin_port < _peer.m_addr.sin_port);
-#endif
-}
-
 const SOCKADDR_IN &Peer::GetNativeStruct() const
 {
 	return m_addr;

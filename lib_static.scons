@@ -8,16 +8,28 @@ Import("env")
 # NETDUKE
 netduke_name = "netduke"
 
-lib = env.StaticLibrary(netduke_name, Glob("Sources/*.cpp"))
-
-LINK_WITH = ['netduke']
+LIB_SOURCE = Glob("Sources/*.cpp")
+SAMPLE_LINK_WITH = ['netduke']
 
 if platform.system() == 'Windows':
-	LINK_WITH.append("Ws2_32.lib")
+	SAMPLE_LINK_WITH.append("Ws2_32.lib")
+	LIB_SOURCE.extend(Glob("Sources/windows/*.cpp"))
+elif platform.system() == 'Linux':
+	LIB_SOURCE.extend(Glob("Sources/linux/*.cpp"))
+else:
+	print("Stopping build : Platform unknown %s" % (platform.system()))
+	exit(1)
+
+
+lib = env.StaticLibrary(netduke_name, LIB_SOURCE)
+
+
+
+
 
 # SAMPLE
 sample_name = "sample"
-sample = env.Program(sample_name, Glob("Sample/Sources/*.cpp"), LIBS=LINK_WITH, LIBPATH='.')
+sample = env.Program(sample_name, Glob("Sample/Sources/*.cpp"), LIBS=SAMPLE_LINK_WITH, LIBPATH='.')
 
 #env.Install("../../lib", lib)
 #env.Install("../../lib", sample)

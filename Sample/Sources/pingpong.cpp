@@ -1,7 +1,5 @@
 #include "pingpong.h"
 
-#include "serializerless.h"
-
 #include <thread>
 #include <mutex>
 #include <iostream>

@@ -169,34 +169,5 @@ void Transport::DesInitPlatform()
 	}
 }
 
-// platform specific
-#if defined(_WIN32)
-bool Transport::InitPlatformPrivate()
-{
-	WSADATA wsa;
-	int result = WSAStartup(MAKEWORD(2, 2), &wsa);
-
-	return result == 0;
-}
-
-bool Transport::DesInitPlatformPrivate()
-{
-	WSACleanup();
-	return true;
-}
-
-#else
-// default
-bool Transport::InitPlatformPrivate()
-{
-	return true;
-}
- 
-bool Transport::DesInitPlatformPrivate()
-{
-	return true;
-}
-
-#endif
 
 };

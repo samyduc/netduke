@@ -26,7 +26,7 @@ class UDPStream : public Stream
 public:
 	
 	explicit		UDPStream(const Peer& _peer);
-	virtual			~UDPStream();
+	virtual			~UDPStream(); // platform specific
 
 	UDPStream&		operator=( const UDPStream& ) { assert(false); }
 

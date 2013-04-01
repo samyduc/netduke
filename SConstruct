@@ -9,11 +9,11 @@ MINGW_TARGET = False
 
 env_base = Environment()
 env_base.Append(CPPPATH=CPPPATH)
-env_base.Append(CCFLAGS="-Wfatal-errors")
 
 # custom build by platform
-
 if platform.system() == 'Windows':
+
+	env_base.Append(CPPDEFINES=['WIN32_LEAN_AND_MEAN', 'WINDOWS_TARGET'])
 
 	if MINGW_TARGET:
 		# build with gcc on windows (experimental)
@@ -24,7 +24,12 @@ if platform.system() == 'Windows':
 		env_base.PrependENVPath('LIB', 'C:\\MinGW64\\lib')
 
 elif platform.system() == 'Linux':
+	env_base.Append(CPPDEFINES=['LINUX_TARGET'])
 	env_base.Append(CCFLAGS="-std=c++11")
+	env_base.Append(CCFLAGS="-Wfatal-errors")
+else:
+	print("Stopping build : Platform unknown %s" % (platform.system()))
+	exit(1)
 
 # debug
 env_debug = env_base.Clone()

@@ -19,17 +19,6 @@ UDPStream::UDPStream(const Peer& _peer)
 
 }
 
-UDPStream::~UDPStream()
-{
-	Flush();
-	
-#if defined(_WIN32)
-	closesocket(m_socket);
-#else
-	close(m_socket);
-#endif
-}
-
 void UDPStream::Tick()
 {
 	FlushSend();
