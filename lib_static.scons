@@ -16,6 +16,7 @@ if platform.system() == 'Windows':
 	LIB_SOURCE.extend(Glob("Sources/windows/*.cpp"))
 elif platform.system() == 'Linux':
 	LIB_SOURCE.extend(Glob("Sources/linux/*.cpp"))
+	SAMPLE_LINK_WITH.insert(0, "rt")
 else:
 	print("Stopping build : Platform unknown %s" % (platform.system()))
 	exit(1)

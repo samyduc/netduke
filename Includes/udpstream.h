@@ -34,7 +34,7 @@ public:
 	netU32			GetType() const { return s_typeUDPStream; } 
 
 	void			CreateAndBind();
-	inline size_t	GetHeaderSize() const;
+	size_t			GetHeaderSize() const;
 
 	netBool			Pull(SerializerLess &_ser, Peer& _peer);
 	netBool			Push(SerializerLess &_ser, const Peer& _peer);

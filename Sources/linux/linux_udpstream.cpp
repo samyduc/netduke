@@ -7,7 +7,7 @@ namespace NetDuke
 UDPStream::~UDPStream()
 {
 	Flush();
-	closesocket(m_socket);
+	close(m_socket);
 }
 
 
