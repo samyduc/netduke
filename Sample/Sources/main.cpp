@@ -26,7 +26,7 @@ void threaded_server()
 
 void threaded_client()
 {
-	NetDukeSample::PingPongClient client("127.0.0.1", 15002);
+	NetDukeSample::PingPongClient client("88.191.134.22", 15002);
 
 	bool bCond = true;
 	while(bCond)
@@ -99,14 +99,16 @@ int main(void)
 	}*/
 
 	// thread
-	std::thread t1(threaded_server);
-	Sleep(50);
+	/*std::thread t1(threaded_server);
+	/Sleep(50);*/
 
-	std::list<std::thread> threads;
+	/*std::list<std::thread> threads;
 	for(size_t i = 0; i<1; ++i)
 	{
 		threads.push_back(std::thread(threaded_client));
-	}
+	}*/
+
+	std::thread t1(threaded_client);
 
 	t1.join();
 

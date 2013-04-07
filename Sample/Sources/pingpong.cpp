@@ -21,112 +21,87 @@ void Log(char *fmt, ...)
 }
 
 PingPongServer::PingPongServer(NetDuke::netU16 _port)
+	: m_netduke()
 {
-	m_transport.InitPlatform();
+	m_netduke.Init();
 
 	NetDuke::Peer peer;
 	peer.SetPort(_port);
 	peer.SetIPv4Addr("0.0.0.0");
-	m_transport.Listen(peer);
+	m_netduke.GetTransport().Listen(peer);
+
+	m_netduke.RegisterService(*this);
+}
+
+PingPongServer::~PingPongServer()
+{
+	m_netduke.UnRegisterService(*this);
+}
+
+void PingPongServer::OnRecvPing(NetDuke::netU32 _type, NetDuke::netU64 _timestamp, NetDuke::Peer _peer)
+{
+	(void)_type;
+	(void)_timestamp;
+	(void)_peer;
 }
 
 void PingPongServer::Tick()
 {
-	m_transport.Tick();
-
-	NetDuke::Peer peer;
-
-	// ping
-	NetDuke::SerializerLess ser;
-	
-	while(m_transport.Pull(ser, peer))
-	{
-		// pong
-		NetDuke::Serializer ser_copy(ser);
-		m_transport.Send(ser_copy, peer, NetDuke::s_typeReliableListener);
-
-		ser.ResetCursor();
-	}
+	m_netduke.Tick();
 }
 
 PingPongClient::PingPongClient(NetDuke::netChar* _addr, NetDuke::netU16 _port)
-	: m_serializer(NetDuke::Serializer::MTU)
-	, m_state(false)
-	, m_round(0)
+	: m_netduke()
 {
-	m_transport.InitPlatform();
+	m_netduke.Init();
 
 	NetDuke::Peer peer;
 	peer.SetPort(0);
 	peer.SetIPv4Addr("0.0.0.0");
-	m_transport.Listen(peer);
+	m_netduke.GetTransport().Listen(peer);
 
 	m_peer.SetIPv4Addr(_addr);
 	m_peer.SetPort(_port);
+
+	m_netduke.RegisterService(*this);
+}
+
+PingPongClient::~PingPongClient()
+{
+	m_netduke.UnRegisterService(*this);
 }
 
 void PingPongClient::Tick()
 {
-	m_transport.Tick();
+	static bool sent = false;
 
-	if(!m_state)
+	if(!sent)
 	{
-		m_state = true;
-		m_serializer.ResetCursor();
-		m_serializer.Write("pingpong");
-		m_serializer << m_round;
-		m_serializer.Close();
-
-		m_clock = clock();
-		
-		m_transport.Send(m_serializer, m_peer, NetDuke::s_typeReliableListener);
-		// force bundling
-		//NetDuke::Serializer serializer(m_serializer);
-		//m_transport.Send(serializer, m_peer, NetDuke::s_typeReliableListener);
+		SendPing(m_peer);
+		sent = true;
 	}
-	else
-	{
-		NetDuke::Peer peer;
 
-		// ping
-		NetDuke::SerializerLess ser;
-		clock_t interval = clock() - m_clock;
-
-		while(m_transport.Pull(ser, peer))
-		{		
-			m_state = false;
-
-			NetDuke::netU32 round;
-			NetDuke::netBool ret = m_serializer.Read("pingpong");
-			assert(ret);
-
-			m_serializer >> round;
-			m_serializer.Close();
-
-			assert(round == m_round);
-
-			if(m_round == 0xFFFFFFFF)
-			{
-				m_round = 0;
-			}
-			else
-			{
-				++m_round;
-			}
-			// log recv
-			std::lock_guard<std::mutex> gLock(g_globalLock);
-			std::thread::id id = std::this_thread::get_id();
-			printf("threadId:%llu, clicks :%llu clicks seconds :%f \n", id, interval, ((double)interval)/CLOCKS_PER_SEC);
-		}
-
-		/*if(interval > 1000)
-		{
-			std::lock_guard<std::mutex> gLock(g_globalLock);
-			printf("threadId:%llu, retry \n", std::this_thread::get_id());
-			m_state = false;
-		}*/
-	}
+	m_netduke.Tick();
 }
+
+void PingPongClient::OnRecvPing(NetDuke::netU32 _type, NetDuke::netU64 _timestamp, NetDuke::Peer _peer)
+{
+	// send back
+	assert(_type == NetDuke::PingService::TYPE_RESPONSE);
+	assert(m_peer.GetIPv4Addr() == _peer.GetIPv4Addr());
+	assert(m_peer.GetPort() == _peer.GetPort());
+
+
+	SendPing(_peer);
+	std::lock_guard<std::mutex> lock_guard(g_globalLock);
+	printf("ping: %llu\n", GetLastPingMs());
+}
+
+
+
+
+
+
 
 
 
