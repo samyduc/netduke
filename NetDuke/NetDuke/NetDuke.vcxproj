@@ -125,17 +125,21 @@
   <ItemGroup>
     <ClInclude Include="..\..\Includes\channel.h" />
     <ClInclude Include="..\..\Includes\crc.h" />
+    <ClInclude Include="..\..\Includes\dataset.h" />
     <ClInclude Include="..\..\Includes\listener.h" />
     <ClInclude Include="..\..\Includes\netdef.h" />
     <ClInclude Include="..\..\Includes\netduke.h" />
     <ClInclude Include="..\..\Includes\peer.h" />
     <ClInclude Include="..\..\Includes\pingservice.h" />
     <ClInclude Include="..\..\Includes\reliablelistener.h" />
+    <ClInclude Include="..\..\Includes\rpc.h" />
+    <ClInclude Include="..\..\Includes\rpcservice.h" />
     <ClInclude Include="..\..\Includes\serializer.h" />
     <ClInclude Include="..\..\Includes\SerializerLess.h" />
     <ClInclude Include="..\..\Includes\serializerpool.h" />
     <ClInclude Include="..\..\Includes\layer.h" />
     <ClInclude Include="..\..\Includes\service.h" />
+    <ClInclude Include="..\..\Includes\servicehandler.h" />
     <ClInclude Include="..\..\Includes\stream.h" />
     <ClInclude Include="..\..\Includes\timeplatform.h" />
     <ClInclude Include="..\..\Includes\transport.h" />
@@ -143,8 +147,6 @@
     <ClInclude Include="..\..\Includes\udpstream.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Includes\netduke.cpp" />
-    <ClCompile Include="..\..\Includes\pingservice.cpp" />
     <ClCompile Include="..\..\Sources\channel.cpp" />
     <ClCompile Include="..\..\Sources\crc.cpp" />
     <ClCompile Include="..\..\Sources\linux\linux_peer.cpp">
@@ -167,11 +169,15 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">WINDOWS_LEAN_AND_MEAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\Sources\netduke.cpp" />
     <ClCompile Include="..\..\Sources\peer.cpp" />
+    <ClCompile Include="..\..\Sources\pingservice.cpp" />
     <ClCompile Include="..\..\Sources\reliablelistener.cpp" />
+    <ClCompile Include="..\..\Sources\rpcservice.cpp" />
     <ClCompile Include="..\..\Sources\serializer.cpp" />
     <ClCompile Include="..\..\Sources\SerializerLess.cpp" />
     <ClCompile Include="..\..\Sources\serializerpool.cpp" />
+    <ClCompile Include="..\..\Sources\service.cpp" />
     <ClCompile Include="..\..\Sources\transport.cpp" />
     <ClCompile Include="..\..\Sources\unreliablelistener.cpp" />
     <ClCompile Include="..\..\Sources\udpstream.cpp" />

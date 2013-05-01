@@ -16,11 +16,12 @@ public:
 	explicit PingPongServer(NetDuke::netU16 _port);
 	~PingPongServer();
 
-	void Tick();
-	void OnRecvPing(NetDuke::netU32 _type, NetDuke::netU64 _timestamp, NetDuke::Peer _peer);
+	void Init();
+	void DeInit();
 
-private:
-	NetDuke::NetDuke m_netduke;
+	void Tick();
+
+	NetDuke::NetDuke&	GetNetDuke() { return *m_netduke; }
 
 
 };
@@ -31,13 +32,15 @@ public:
 	explicit PingPongClient(NetDuke::netChar* _addr, NetDuke::netU16 _port);
 	~PingPongClient();
 
+	void Init();
+	void DeInit();
+
 	void Tick();
-	void OnRecvPing(NetDuke::netU32 _type, NetDuke::netU64 _timestamp, NetDuke::Peer _peer);
+
+	NetDuke::NetDuke&	GetNetDuke() { return *m_netduke; }
 
 private:
-	NetDuke::NetDuke m_netduke;
 	NetDuke::Peer m_peer;
-
 };
 
 

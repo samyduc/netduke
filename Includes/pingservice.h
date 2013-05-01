@@ -1,50 +1,101 @@
 #pragma once
 
 #include "netdef.h"
+#include "netduke.h"
 
 #include "service.h"
+#include "servicehandler.h"
+#include "rpc.h"
 #include "crc.h"
 #include "serializer.h"
+#include "serializerless.h"
+#include "dataset.h"
 
 namespace NetDuke
 {
 
 static const netU32 s_typePingService = CRC32::Compute("PingService");
-
+static const netU32 s_datasetRPCPingIn = CRC32::Compute("s_datasetRPCPingIn");
+static const netU32 s_datasetRPCPingOut = CRC32::Compute("s_datasetRPCPingOut");
 
 class Transport;
 class SerializerLess;
 
-class PingService : public Service
+struct PingRPCIn : public Dataset
+{
+	netU64 m_time;
+	netU32 m_seq;
+
+	netU32 GetType() const { return s_datasetRPCPingIn; }
+
+	void Write(Serializer& _ser)
+	{
+		_ser << m_time;
+		_ser << m_seq;
+	}
+
+	void Read(Serializer& _ser)
+	{
+		_ser >> m_time;
+		_ser >> m_seq;
+	}
+};
+
+struct PingRPCOut : public Dataset
+{
+	netU64 m_time;
+	netU32 m_seq;
+
+	netU32 GetType() const { return s_datasetRPCPingOut; }
+
+	void Write(Serializer& _ser)
+	{
+		_ser << m_time;
+		_ser << m_seq;
+	}
+
+	void Read(Serializer& _ser)
+	{
+		_ser >> m_time;
+		_ser >> m_seq;
+	}
+};
+
+class PingRPC : public RPC
+{
+public:
+
+	netU32		GetType() const { return CRC32::Compute("PingRPC"); }
+
+	Dataset&	In() { return m_in; }
+	Dataset&	Out() { return m_out; }
+
+	PingRPCIn	m_in;
+	PingRPCOut	m_out;
+
+};
+
+class PingService : public ServiceHandler<PingService>
 {
 public:
 	
 
-							PingService();
-							PingService(Transport* _transport);
+							PingService(NetDuke* _netDuke);
 	virtual					~PingService();
 
-	void					SetTransport(Transport* _transport) { m_transport = _transport; }
+	virtual void			Init() {}
+	virtual void			DeInit() {}
 
 	virtual	void			Tick();
 	virtual netU32			GetType() const { return s_typePingService; }
 
-	virtual inline size_t	GetHeaderSize() const { return 0; };
-
-	virtual netBool			Pull(SerializerLess &_ser, Peer& _peer);
-	virtual netBool			Push(SerializerLess &_ser, const Peer& _peer);
-
 	void					SendPing(const Peer& _peer);
-
 	netU64					GetLastPingMs() { return m_lastPingMs; } 
 
 	// overload for custom use
-	virtual void			OnRecvPing(netU32 _type, netU64 _timestamp, Peer _peer) { (void)_type; (void)_timestamp; (void)_peer; };
+	virtual netBool			OnRecvPing(Peer& _peer);
 
 protected:
-
-	virtual netBool			Pack(SerializerLess& _ser, const Peer& _peer);
-	virtual netBool			UnPack(SerializerLess& _ser, const Peer& _peer);
 
 protected:
 
@@ -54,9 +105,9 @@ protected:
 		TYPE_RESPONSE = 1,
 	};
 
-	Serializer m_request;
-	netU64 m_lastPingMs;
-	Transport* m_transport;
+	PingRPC		m_pingRPC;
+	netU64		m_lastPingMs;
+	netU32		m_seq;
 };
 
 

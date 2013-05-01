@@ -15,25 +15,35 @@
 void threaded_server()
 {
 	NetDukeSample::PingPongServer server(15002);
+	NetDuke::NetDuke & net_duke = server.GetNetDuke();
+
+	net_duke.RegisterService(server);
 
 	bool bCond = true;
 	while(bCond)
 	{
-		server.Tick();
+		net_duke.Tick();
 		Sleep(1);
 	}
+
+	net_duke.UnRegisterService(server);
 }
 
 void threaded_client()
 {
-	NetDukeSample::PingPongClient client("88.191.134.22", 15002);
+	NetDukeSample::PingPongClient client("127.0.0.1", 15002);
+	NetDuke::NetDuke & net_duke = client.GetNetDuke();
+
+	net_duke.RegisterService(client);
 
 	bool bCond = true;
 	while(bCond)
 	{
-		client.Tick();
+		net_duke.Tick();
 		Sleep(1);
 	}
+
+	net_duke.UnRegisterService(client);
 }
 
 int main(void)
@@ -99,16 +109,14 @@ int main(void)
 	}*/
 
 	// thread
-	/*std::thread t1(threaded_server);
-	/Sleep(50);*/
+	std::thread t1(threaded_server);
+	Sleep(50);
 
-	/*std::list<std::thread> threads;
+	std::list<std::thread> threads;
 	for(size_t i = 0; i<1; ++i)
 	{
 		threads.push_back(std::thread(threaded_client));
-	}*/
-
-	std::thread t1(threaded_client);
+	}
 
 	t1.join();
 

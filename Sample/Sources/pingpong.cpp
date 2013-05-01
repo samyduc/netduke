@@ -21,86 +21,85 @@ void Log(char *fmt, ...)
 }
 
 PingPongServer::PingPongServer(NetDuke::netU16 _port)
-	: m_netduke()
+	: PingService(nullptr)
 {
-	m_netduke.Init();
+	m_netduke = new NetDuke::NetDuke();
+	m_netduke->Init();
 
 	NetDuke::Peer peer;
 	peer.SetPort(_port);
 	peer.SetIPv4Addr("0.0.0.0");
-	m_netduke.GetTransport().Listen(peer);
-
-	m_netduke.RegisterService(*this);
+	m_netduke->GetTransport().Listen(peer);
 }
 
 PingPongServer::~PingPongServer()
 {
-	m_netduke.UnRegisterService(*this);
+	
 }
 
-void PingPongServer::OnRecvPing(NetDuke::netU32 _type, NetDuke::netU64 _timestamp, NetDuke::Peer _peer)
+void PingPongServer::Init()
 {
-	(void)_type;
-	(void)_timestamp;
-	(void)_peer;
+	m_netduke->EnableRPC(true);
 }
+
+void PingPongServer::DeInit()
+{
+}
+
 
 void PingPongServer::Tick()
 {
-	m_netduke.Tick();
 }
 
 PingPongClient::PingPongClient(NetDuke::netChar* _addr, NetDuke::netU16 _port)
-	: m_netduke()
+	: PingService(nullptr)
 {
-	m_netduke.Init();
+	m_netduke = new NetDuke::NetDuke();
+	m_netduke->Init();
 
 	NetDuke::Peer peer;
 	peer.SetPort(0);
 	peer.SetIPv4Addr("0.0.0.0");
-	m_netduke.GetTransport().Listen(peer);
+	m_netduke->GetTransport().Listen(peer);
 
 	m_peer.SetIPv4Addr(_addr);
 	m_peer.SetPort(_port);
-
-	m_netduke.RegisterService(*this);
 }
 
 PingPongClient::~PingPongClient()
 {
-	m_netduke.UnRegisterService(*this);
+}
+
+void PingPongClient::Init()
+{
+	m_netduke->EnableRPC(true);
+}
+
+void PingPongClient::DeInit()
+{
 }
 
 void PingPongClient::Tick()
 {
-	static bool sent = false;
-
-	if(!sent)
+	if(m_pingRPC.IsComplete())
 	{
-		SendPing(m_peer);
-		sent = true;
+		if(m_pingRPC.IsSuccess())
+		{
+			m_lastPingMs = NetDuke::Time::GetMsTime() - m_pingRPC.m_out.m_time;
+
+			std::lock_guard<std::mutex> lock_guard(g_globalLock);
+			printf("ping: %llu seq:%d\n", GetLastPingMs(), m_seq);
+			assert(m_pingRPC.m_in.m_seq == m_seq-1);
+
+			SendPing(m_peer);
+		}
 	}
-
-	m_netduke.Tick();
+	else if(m_pingRPC.GetState() == NetDuke::RPC::eState::STATE_UNDEFINED)
+	{
+		// first send
+		SendPing(m_peer);
+	}
 }
-
-void PingPongClient::OnRecvPing(NetDuke::netU32 _type, NetDuke::netU64 _timestamp, NetDuke::Peer _peer)
-{
-	// send back
-	assert(_type == NetDuke::PingService::TYPE_RESPONSE);
-	assert(m_peer.GetIPv4Addr() == _peer.GetIPv4Addr());
-	assert(m_peer.GetPort() == _peer.GetPort());
-
-
-	SendPing(_peer);
-	std::lock_guard<std::mutex> lock_guard(g_globalLock);
-	printf("ping: %llu\n", GetLastPingMs());
-}
-
-
-
-
-
 
 
 
