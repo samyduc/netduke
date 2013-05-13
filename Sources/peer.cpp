@@ -7,6 +7,12 @@ Peer::Peer()
 {
 }
 
+Peer::Peer(netChar* _ipv4, netU16 _port)
+{
+	SetIPv4Addr(_ipv4);
+	SetPort(_port);
+}
+
 Peer::Peer(const Peer& _peer)
 {
 	m_addr.sin_family = _peer.m_addr.sin_family;

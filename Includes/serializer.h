@@ -2,7 +2,7 @@
 
 #include "netdef.h"
 
-#include <algorithm>
+//#include <algorithm>
 #include <assert.h>
 
 namespace NetDuke

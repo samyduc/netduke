@@ -1,12 +1,10 @@
 #pragma once
 
 #include "netdef.h"
+#include "extinclude.h"
 #include "layer.h"
 
-#ifdef _WIN32
-	#include <winsock2.h>
-	#include <ws2tcpip.h>
-#endif
+
 
 namespace NetDuke
 {

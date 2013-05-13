@@ -22,7 +22,7 @@ class Transport : public Layer
 {
 public:
 						Transport() {}
-						~Transport() {}
+	virtual				~Transport() {}
 
 	void				InitPlatform();
 	void				DesInitPlatform();

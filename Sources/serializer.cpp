@@ -2,9 +2,13 @@
 #include "serializerless.h"
 #include "crc.h"
 
-#if !defined(_WIN32)
-	// memcpy
-	#include <cstring>
+
+// memcpy
+#include <cstring>
+
+
+#if defined(_MSC_VER)
+	#include <stdlib.h> // _byteswap_XX
 #endif
 
 namespace NetDuke

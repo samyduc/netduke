@@ -1,21 +1,8 @@
 #pragma once
 
 #include "netdef.h"
+#include "extinclude.h"
 
-#if defined(WINDOWS_TARGET)
-	#include <winsock2.h>
-	#include <ws2tcpip.h>
-#elif defined(LINUX_TARGET)
-	#include <sys/socket.h>
-	#include <netinet/in.h>
-	#include <arpa/inet.h>
-	#include <unistd.h>
-	#define SOCKADDR struct sockaddr	
-	#define SOCKADDR_IN struct sockaddr_in
-	#define SOCKET int	
-#else
-	#error "no include for socket !"
-#endif
 
 namespace NetDuke
 {
@@ -24,6 +11,7 @@ class Peer
 {
 public:
 						Peer();
+						Peer(netChar* _ipv4, netU16 _port);
 						Peer(const  Peer& _peer);
 	virtual				~Peer() {}
 

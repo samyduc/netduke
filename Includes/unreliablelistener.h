@@ -21,7 +21,7 @@ class UnreliableListener : public Listener
 public:
 
 				UnreliableListener();
-				~UnreliableListener();
+	virtual		~UnreliableListener();
 
 	void		Tick();
 	netU32		GetType() const { return s_typeUnreliableListener; } 

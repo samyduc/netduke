@@ -42,7 +42,6 @@ namespace NetDuke
 	typedef			 float		netF32;
 	typedef			 double		netF64;
 
-
 #else
 #error "Compiler not defined"
 #endif

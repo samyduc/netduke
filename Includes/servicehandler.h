@@ -6,6 +6,8 @@
 #include "peer.h"
 #include "rpc.h"
 
+#include <map>
+
 namespace NetDuke
 {
 
@@ -16,9 +18,6 @@ template<class TUP>
 class ServiceHandler : public Service
 {
 public:
-	explicit ServiceHandler(NetDuke* _netduke, TUP* _this) : Service(_netduke), m_this(_this) {}
-	virtual ~ServiceHandler() {}
-
 	typedef netBool (TUP::*rpchandler_t)(Peer&);
 
 	struct RPCHandler
@@ -36,12 +35,18 @@ public:
 		RPC*			m_rpc;
 	};
 
+	typedef std::map<netU32, struct RPCHandler> handlers_t;
+
+public:
+	explicit ServiceHandler(NetDuke* _netduke, TUP* _this) : Service(_netduke), m_this(_this) {}
+	virtual ~ServiceHandler() {}
+
 protected:
 
 	void RegisterHandler(RPC& _rpc, rpchandler_t _handler_func)
 	{
 		netU32 type = _rpc.In().GetType();
-		handlers_t::iterator it = m_handlers.find(type);
+		typename handlers_t::iterator it = m_handlers.find(type);
 
 		if(it == m_handlers.end())
 		{
@@ -56,7 +61,7 @@ protected:
 
 	void UnregisterHandler(netU32 _type)
 	{
-		handlers_t::iterator it = m_handlers.find(_type);
+		typename handlers_t::iterator it = m_handlers.find(_type);
 
 		if(it != m_handlers.end())
 		{
@@ -68,12 +73,12 @@ protected:
 	{ 
 		netU32 type = _ser.GetType();
 		netBool ret = false;
-		handlers_t::iterator it = m_handlers.find(type);
+		typename handlers_t::iterator it = m_handlers.find(type);
 
 		if(it != m_handlers.end())
 		{
 			SerializerLess response;
-			RPCHandler &handler = it->second;
+			struct RPCHandler &handler = it->second;
 			handler.m_rpc->ChangeState(RPC::eState::STATE_RECEIVING);
 
 			ret = handler.m_rpc->UnSerialize(handler.m_rpc->In(), _ser);
@@ -98,8 +103,7 @@ protected:
 		return ret; 
 	}
 
-	
-	typedef std::map<netU32, RPCHandler> handlers_t;
+protected:
 	handlers_t	m_handlers;
 	TUP*		m_this;
 

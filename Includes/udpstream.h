@@ -1,6 +1,8 @@
 #pragma once
 
 #include "netdef.h"
+#include "extinclude.h"
+
 #include "crc.h"
 
 #include "stream.h"
@@ -11,9 +13,6 @@
 #include "serializerless.h"
 
 #include "serializerpool.h"
-
-#include <map>
-#include <list>
 
 
 namespace NetDuke

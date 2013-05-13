@@ -1,6 +1,5 @@
 #include "udpstream.h"
 
-
 namespace NetDuke
 {
 

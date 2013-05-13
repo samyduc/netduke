@@ -147,7 +147,35 @@ void NetDuke::EnableRPC(netBool _state)
 	}
 }
 
+extern "C" {
 
+
+int main()
+{
+	Peer listen_peer("127.0.0.1", 9000);
+	Peer send_peer("127.0.0.1", 9001);
+
+	Serializer ser(1024);
+	ser.Write("toto");
+	ser << 12;
+	ser.Close();
+
+	NetDuke netduke;
+
+	netduke.Init();
+
+	netduke.GetTransport().Listen(listen_peer);
+	netduke.GetTransport().Send(ser, send_peer, s_typeUnreliableListener);
+
+	/*while(true)
+	{
+		netduke.Tick();
+	}*/
+
+	return 0;
+}
+
+}
 
 
 }

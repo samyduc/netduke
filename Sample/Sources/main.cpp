@@ -7,6 +7,7 @@
 #include <thread>
 #include <list>
 
+
 #if !defined(_WIN32)
 	#include <unistd.h>
 	#define Sleep sleep
@@ -109,16 +110,18 @@ int main(void)
 	}*/
 
 	// thread
-	std::thread t1(threaded_server);
+	/*std::thread t1(threaded_server);
 	Sleep(50);
 
 	std::list<std::thread> threads;
-	for(size_t i = 0; i<1; ++i)
+	for(size_t i = 0; i<10; ++i)
 	{
 		threads.push_back(std::thread(threaded_client));
 	}
 
 	t1.join();
+
+	printf("helloworld");*/
 
 	return 0;
 }

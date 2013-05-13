@@ -85,8 +85,8 @@ public:
 
 	void				Reset()
 	{
-		ChangeState(eState::STATE_UNDEFINED);
-		ChangeError(eError::ERROR_UNDEFINED);
+		ChangeState(STATE_UNDEFINED);
+		ChangeError(ERROR_UNDEFINED);
 		m_seq = 0;
 		m_start_time = 0;
 		m_ser.ResetCursor();

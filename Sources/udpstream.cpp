@@ -134,8 +134,13 @@ void UDPStream::CreateAndBind()
 	assert(err == 0);
 
 	// overwrite port (if automatic attribution)
-	socklen_t native_size = sizeof(native_addr);
-	err = getsockname(m_socket, (struct sockaddr *)&native_addr, &native_size);
+	if(m_peer.GetPort() == 0)
+	{
+		// WARNING : incompatible with emscripten
+		socklen_t native_size = sizeof(native_addr);
+		err = getsockname(m_socket, (struct sockaddr *)&native_addr, &native_size);
+		assert(err == 0);
+	}
 
 	m_isValid = (m_socket != 0);
 }

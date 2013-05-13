@@ -44,7 +44,7 @@ struct ReliableRecvInfo
 	{
 	}
 
-	bool operator<(struct ReliableRecvInfo& _cmp) const
+	bool operator<(const struct ReliableRecvInfo& _cmp) const
 	{
 		return m_sequence < _cmp.m_sequence;
 	}
@@ -120,7 +120,7 @@ class ReliableListener : public Listener
 public:
 
 							ReliableListener();
-							~ReliableListener();
+	virtual					~ReliableListener();
 
 	void					Tick();
 	netU32					GetType() const { return s_typeReliableListener; } 
