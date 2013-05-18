@@ -40,17 +40,25 @@ public:
 	netBool				Push(SerializerLess &_ser, const Peer& _peer);
 	netBool				Pull(SerializerLess &_ser, Peer& _peer);
 
+	// helper
+	void				InitTCPStack(const Peer &_peer);
+	void				InitUDPStack(const Peer &_peer);
+
+	netBool				IsTCPEnabled() { return m_tcpMode; }
+
 protected:
 	netBool				Pack(SerializerLess& _ser, const Peer& _peer);
 	netBool				UnPack(SerializerLess& _ser, const Peer& _peer);
 	
 private:
 
+	netBool		m_tcpMode;
 	listeners_t m_listeners;
 	streams_t	m_streams;
 
-	bool				InitPlatformPrivate();
-	bool				DesInitPlatformPrivate();
+private:
+	netBool				InitPlatformPrivate();
+	netBool				DesInitPlatformPrivate();
 
 };
 

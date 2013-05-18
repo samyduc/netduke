@@ -114,7 +114,7 @@ int main(void)
 	Sleep(50);
 
 	std::list<std::thread> threads;
-	for(size_t i = 0; i<10; ++i)
+	for(size_t i = 0; i<1; ++i)
 	{
 		threads.push_back(std::thread(threaded_client));
 	}
@@ -122,6 +122,16 @@ int main(void)
 	t1.join();
 
 	printf("helloworld");*/
+
+	NetDuke::NetDuke netduke;
+	netduke.Init();
+
+	NetDuke::Transport& transport = netduke.GetTransport();
+
+	NetDuke::Peer peer("0.0.0.0", 88);
+	transport.InitTCPStack(peer);
+
+	printf("lol");
 
 	return 0;
 }

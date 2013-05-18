@@ -147,7 +147,7 @@ void NetDuke::EnableRPC(netBool _state)
 	}
 }
 
-extern "C" {
+/*extern "C" {
 
 
 int main()
@@ -167,15 +167,15 @@ int main()
 	netduke.GetTransport().Listen(listen_peer);
 	netduke.GetTransport().Send(ser, send_peer, s_typeUnreliableListener);
 
-	/*while(true)
-	{
-		netduke.Tick();
-	}*/
+	//while(true)
+	//{
+	//	netduke.Tick();
+	//}
 
 	return 0;
 }
 
-}
+}*/
 
 
 }

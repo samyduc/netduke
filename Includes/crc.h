@@ -78,6 +78,7 @@ static const netU32 s_typeTransport = CRC32::Compute("transport");
 static const netU32 s_typeUnreliableListener = CRC32::Compute("unreliablelistener");
 static const netU32 s_typeReliableListener = CRC32::Compute("reliablelistener");
 static const netU32 s_typeUDPStream = CRC32::Compute("udpstream");
+static const netU32 s_typeTCPStream = CRC32::Compute("tcpstream");
 static const netU32 s_typeCrc32 = CRC32::Compute("crc32");
 
 

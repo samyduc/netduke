@@ -29,7 +29,8 @@ PingPongServer::PingPongServer(NetDuke::netU16 _port)
 	NetDuke::Peer peer;
 	peer.SetPort(_port);
 	peer.SetIPv4Addr("0.0.0.0");
-	m_netduke->GetTransport().Listen(peer);
+	//m_netduke->GetTransport().Listen(peer);
+	m_netduke->GetTransport().InitTCPStack(peer);
 }
 
 PingPongServer::~PingPongServer()
@@ -51,7 +52,7 @@ void PingPongServer::Tick()
 {
 }
 
-PingPongClient::PingPongClient(NetDuke::netChar* _addr, NetDuke::netU16 _port)
+PingPongClient::PingPongClient(const NetDuke::netChar* _addr, NetDuke::netU16 _port)
 	: PingService(nullptr)
 {
 	m_netduke = new NetDuke::NetDuke();
@@ -60,7 +61,8 @@ PingPongClient::PingPongClient(NetDuke::netChar* _addr, NetDuke::netU16 _port)
 	NetDuke::Peer peer;
 	peer.SetPort(0);
 	peer.SetIPv4Addr("0.0.0.0");
-	m_netduke->GetTransport().Listen(peer);
+	//m_netduke->GetTransport().Listen(peer);
+	m_netduke->GetTransport().InitTCPStack(peer);
 
 	m_peer.SetIPv4Addr(_addr);
 	m_peer.SetPort(_port);

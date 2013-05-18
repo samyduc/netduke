@@ -29,7 +29,7 @@ public:
 class PingPongClient : public NetDuke::PingService
 {
 public:
-	explicit PingPongClient(NetDuke::netChar* _addr, NetDuke::netU16 _port);
+	explicit PingPongClient(const NetDuke::netChar* _addr, NetDuke::netU16 _port);
 	~PingPongClient();
 
 	void Init();

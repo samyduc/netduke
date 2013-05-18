@@ -86,7 +86,17 @@ void RPCService::Send(RPC& _rpc, const Peer& _peer)
 	_rpc.ChangeState(RPC::eState::STATE_SENDING);
 
 	m_rpcs.push_back(&_rpc);
-	m_netduke->GetTransport().Send(_rpc.GetSerializer(), _peer, s_typeReliableListener);
+
+	Transport& transport = m_netduke->GetTransport();
+
+	if(transport.IsTCPEnabled())
+	{
+		m_netduke->GetTransport().Send(_rpc.GetSerializer(), _peer, s_typeUnreliableListener);
+	}
+	else
+	{
+		m_netduke->GetTransport().Send(_rpc.GetSerializer(), _peer, s_typeReliableListener);
+	}
 }
 
 netBool RPCService::Recv(SerializerLess& _ser, const Peer& _peer)

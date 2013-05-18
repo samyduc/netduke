@@ -7,7 +7,7 @@ Peer::Peer()
 {
 }
 
-Peer::Peer(netChar* _ipv4, netU16 _port)
+Peer::Peer(const netChar* _ipv4, netU16 _port)
 {
 	SetIPv4Addr(_ipv4);
 	SetPort(_port);
@@ -42,7 +42,7 @@ bool Peer::SetIPv4Addr(netU32 ipv4)
 	return true;
 }
 
-bool Peer::SetIPv4Addr(netChar *ip_char)
+bool Peer::SetIPv4Addr(const netChar *ip_char)
 {
 	m_addr.sin_family = AF_INET; 
 	m_addr.sin_addr.s_addr = inet_addr(ip_char);

@@ -16,6 +16,8 @@ class Listener : public Layer
 {
 public:
 
+	virtual				~Listener() = 0;
+
 	virtual netBool		PullFromStream(SerializerLess& _ser, const Peer& _peer) = 0;
 
 	virtual void		RegisterStream(Stream& _stream) = 0;

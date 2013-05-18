@@ -53,6 +53,8 @@ namespace NetDuke
 
 #elif defined(__gnu_linux__)
 
+#elif defined(EMSCRIPTEN)
+
 #else
 #error "Platform not defined"
 #endif	

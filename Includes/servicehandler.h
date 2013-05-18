@@ -96,7 +96,17 @@ protected:
 			{
 				// send response
 				handler.m_rpc->Serialize(handler.m_rpc->Out(), handler.m_rpc->GetSequence());
-				m_netduke->GetTransport().Send(handler.m_rpc->GetSerializer(), _peer, s_typeReliableListener);
+
+				Transport& transport = m_netduke->GetTransport();
+
+				if(transport.IsTCPEnabled())
+				{
+					transport.Send(handler.m_rpc->GetSerializer(), _peer, s_typeUnreliableListener);
+				}
+				else
+				{
+					transport.Send(handler.m_rpc->GetSerializer(), _peer, s_typeReliableListener);
+				}
 			}
 		}
 

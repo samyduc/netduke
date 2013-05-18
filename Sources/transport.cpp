@@ -5,6 +5,7 @@
 #include "unreliablelistener.h"
 #include "reliablelistener.h"
 #include "udpstream.h"
+#include "tcpstream.h"
 #include "serializer.h"
 #include "serializerless.h"
 #include "peer.h"
@@ -65,6 +66,45 @@ netBool Transport::UnPack(SerializerLess& _ser, const Peer& _peer)
 	return false;
 }
 
+void Transport::InitTCPStack(const Peer &_peer)
+{
+	assert(s_IsPlatformInit);
+
+	m_tcpMode = true;
+	// create stream
+	TCPStream *tcpstream = new TCPStream(_peer);
+	tcpstream->CreateAndBind();
+	m_streams.push_back(tcpstream);
+
+	// create listener - note: we do not need reliable listener on udp
+	UnreliableListener *unreliablelistener = new UnreliableListener();
+	m_listeners.push_back(unreliablelistener);
+	
+	// attach
+	tcpstream->AttachListener(*unreliablelistener);
+}
+
+void Transport::InitUDPStack(const Peer &_peer)
+{
+	assert(s_IsPlatformInit);
+
+	// create stream
+	UDPStream *udpstream = new UDPStream(_peer);
+	udpstream->CreateAndBind();
+	m_streams.push_back(udpstream);
+
+	// create listener
+	UnreliableListener *unreliablelistener = new UnreliableListener();
+	m_listeners.push_back(unreliablelistener);
+
+	ReliableListener *reliablelistener = new ReliableListener();
+	m_listeners.push_back(reliablelistener);
+	
+	// attach
+	udpstream->AttachListener(*unreliablelistener);
+	udpstream->AttachListener(*reliablelistener);
+}
+
 void Transport::Listen(const Peer &_peer)
 {
 	assert(s_IsPlatformInit);
@@ -83,21 +123,8 @@ void Transport::Listen(const Peer &_peer)
 
 	if(is_new)
 	{
-		// create stream
-		UDPStream *udpstream = new UDPStream(_peer);
-		udpstream->CreateAndBind();
-		m_streams.push_back(udpstream);
-
-		// create listener
-		UnreliableListener *unreliablelistener = new UnreliableListener();
-		m_listeners.push_back(unreliablelistener);
-
-		ReliableListener *reliablelistener = new ReliableListener();
-		m_listeners.push_back(reliablelistener);
-	
-		// attach
-		udpstream->AttachListener(*unreliablelistener);
-		udpstream->AttachListener(*reliablelistener);
+		// we use udp by default
+		InitUDPStack(_peer);
 	}
 }
 
@@ -110,6 +137,11 @@ void Transport::Send(Serializer& _ser, const Peer& _peer, netU32 _type)
 		_ser.ResetCursor();
 		SerializerLess serless(_ser);
 		listener->Push(serless, _peer);
+	}
+	else
+	{
+		// unavailable transport
+		assert(false);
 	}
 }
 

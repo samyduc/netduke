@@ -16,6 +16,8 @@ class Stream : public Layer
 {
 public:
 
+	virtual					~Stream() = 0;
+
 	virtual void			CreateAndBind() = 0;
 
 	virtual netBool			IsValid() const = 0;
