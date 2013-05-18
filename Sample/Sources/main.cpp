@@ -13,6 +13,10 @@
 	#define Sleep sleep
 #endif
 
+#if defined(EMSCRIPTEN_TARGET)
+#include <emscripten.h>
+#endif
+
 void threaded_server()
 {
 	NetDukeSample::PingPongServer server(15002);
@@ -46,6 +50,9 @@ void threaded_client()
 
 	net_duke.UnRegisterService(client);
 }
+
+NetDuke::NetDuke *g_duke;
+void one_iter();
 
 int main(void)
 {
@@ -123,6 +130,8 @@ int main(void)
 
 	printf("helloworld");*/
 
+	printf("start\n");
+
 	NetDuke::NetDuke netduke;
 	netduke.Init();
 
@@ -131,7 +140,45 @@ int main(void)
 	NetDuke::Peer peer("0.0.0.0", 88);
 	transport.InitTCPStack(peer);
 
-	printf("lol");
+	printf("init tcp stack\n");
+
+	NetDuke::Peer peer_to("127.0.0.1", 8081);
+
+	printf("write serializer\n");
+
+	NetDuke::Serializer ser(NetDuke::Serializer::MTU);
+	ser.Write("toto");
+	ser << 3;
+	ser << 4;
+	ser.Close();
+
+	printf("end write serializer\n");
+
+	transport.Send(ser, peer_to, NetDuke::s_typeUnreliableListener);
+
+	printf("send data\n");
+
+	netduke.Tick();
+
+#if defined(EMSCRIPTEN_TARGET)
+	g_duke = &netduke;
+	emscripten_set_main_loop(one_iter, 30, 1);
+#else
+	while(true)
+	{
+		printf("tick\n");
+		netduke.Tick();
+		Sleep(1);
+	}
+#endif
+
+	
 
 	return 0;
+}
+
+void one_iter()
+{
+	printf("tick\n");
+	g_duke->Tick();
 }

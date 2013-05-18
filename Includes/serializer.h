@@ -50,10 +50,10 @@ public:
 	void			Copy(const netU8* const _copy, size_t _copy_size);
 
 	netBool			Write(netU32 _type);
-	netBool			Write(netChar* _type);
+	netBool			Write(const netChar* _type);
 
 	netBool			Read(netU32 _type);
-	netBool			Read(netChar* _type);
+	netBool			Read(const netChar* _type);
 
 	void			Close();
 

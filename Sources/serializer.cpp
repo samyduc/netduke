@@ -136,7 +136,7 @@ netBool Serializer::Write(netU32 _type)
 	return m_state == E_WRITE;
 }
 
-netBool Serializer::Write(netChar* _type)
+netBool Serializer::Write(const netChar* _type)
 {
 	return Write(CRC32::Compute(_type));
 }
@@ -180,7 +180,7 @@ netBool Serializer::Read(netU32 _type)
 	return m_state == E_READ;
 }
 
-netBool Serializer::Read(netChar* _type)
+netBool Serializer::Read(const netChar* _type)
 {
 	return Read(CRC32::Compute(_type));
 }
