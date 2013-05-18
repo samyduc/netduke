@@ -229,7 +229,7 @@
       <PreprocessorDefinitions>EMSCRIPTEN_TARGET;WIN32_LEAN_AND_MEAN;__clang__;EMSCRIPTEN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandardMode>LanguageStandardC++11</LanguageStandardMode>
       <LanguageExtensions>EnableLanguageExtensions</LanguageExtensions>
-      <EnableMicrosoftExtensions>true</EnableMicrosoftExtensions>
+      <EnableMicrosoftExtensions>false</EnableMicrosoftExtensions>
       <SpecifyMscVer>NoMscVer</SpecifyMscVer>
       <GenerateDebugInformation>NoDebugInfo</GenerateDebugInformation>
       <OptimizationLevel>O2</OptimizationLevel>
@@ -324,6 +324,8 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Emscripten'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\Sources\linux\linux_timeplatform.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
