@@ -137,7 +137,7 @@ int main(void)
 
 	NetDuke::Transport& transport = netduke.GetTransport();
 
-	NetDuke::Peer peer("0.0.0.0", 88);
+	NetDuke::Peer peer("0.0.0.0", 0);
 	transport.InitTCPStack(peer);
 
 	printf("init tcp stack\n");
@@ -148,8 +148,7 @@ int main(void)
 
 	NetDuke::Serializer ser(NetDuke::Serializer::MTU);
 	ser.Write("toto");
-	ser << 3;
-	ser << 4;
+	ser << 0;
 	ser.Close();
 
 	printf("end write serializer\n");
@@ -159,10 +158,11 @@ int main(void)
 	printf("send data\n");
 
 	netduke.Tick();
+	netduke.Tick();
 
 #if defined(EMSCRIPTEN_TARGET)
 	g_duke = &netduke;
-	emscripten_set_main_loop(one_iter, 30, 1);
+	emscripten_set_main_loop(one_iter, 0, true);
 #else
 	while(true)
 	{
@@ -179,6 +179,32 @@ int main(void)
 
 void one_iter()
 {
-	printf("tick\n");
+	NetDuke::Peer peer_to("127.0.0.1", 8081);
 	g_duke->Tick();
+
+	static NetDuke::timer_t timer =  NetDuke::Time::GetMsTime();
+
+	NetDuke::Transport &transport = g_duke->GetTransport();
+
+	NetDuke::SerializerLess ser;
+	NetDuke::Peer peer;
+	
+	while(transport.Pull(ser, peer))
+	{
+		
+		ser.Read("toto");
+		int seq;
+		static_cast<NetDuke::Serializer&>(ser) >> seq;
+		ser.Close();
+
+		NetDuke::Serializer serSeq(NetDuke::Serializer::MTU);
+		serSeq.Write("toto");
+		serSeq << ++seq;
+		serSeq.Close();
+
+		printf("pong %d, %d, %llu\n", seq, NetDuke::Time::GetMsTime() - timer);
+
+		transport.Send(serSeq, peer_to, NetDuke::s_typeUnreliableListener);
+		timer =  NetDuke::Time::GetMsTime();
+	}
 }

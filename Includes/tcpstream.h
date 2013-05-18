@@ -37,6 +37,7 @@ public:
 
 	TCPStream&					operator=( const TCPStream& ) { assert(false); }
 
+	void						Init();
 	void						Tick();
 	netU32						GetType() const { return s_typeTCPStream; } 
 

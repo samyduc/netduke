@@ -215,6 +215,12 @@ void TCPStream::Accept()
 	}
 }
 
+void TCPStream::Init()
+{
+	// just here to bypass CreateAndBind
+	m_isValid = true;
+}
+
 void TCPStream::CreateAndBind()
 {
 	assert(IsValid() == false);

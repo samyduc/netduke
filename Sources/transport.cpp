@@ -73,7 +73,16 @@ void Transport::InitTCPStack(const Peer &_peer)
 	m_tcpMode = true;
 	// create stream
 	TCPStream *tcpstream = new TCPStream(_peer);
-	tcpstream->CreateAndBind();
+
+	if(_peer.GetPort() != 0)
+	{
+		tcpstream->CreateAndBind();
+	}
+	else
+	{
+		tcpstream->Init();
+	}
+	//
 	m_streams.push_back(tcpstream);
 
 	// create listener - note: we do not need reliable listener on udp
