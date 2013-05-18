@@ -16,7 +16,7 @@ class Stream : public Layer
 {
 public:
 
-	virtual					~Stream() = 0;
+	virtual					~Stream() {}
 
 	virtual void			CreateAndBind() = 0;
 
