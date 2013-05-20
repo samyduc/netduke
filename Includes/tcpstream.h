@@ -80,6 +80,7 @@ private:
 	netBool		m_isValid;
 	netBool		m_opt_compression;
 	netBool		m_opt_encryption;
+	netBool		m_opt_skipCRC;
 
 	const Peer	m_peer;
 	SOCKET		m_socket;

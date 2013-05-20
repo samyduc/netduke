@@ -54,8 +54,8 @@ void threaded_client()
 NetDuke::NetDuke *g_duke;
 void one_iter();
 
-// "88.191.134.22"
 const char *g_addr = "127.0.0.1";
+//const char *g_addr = "88.191.134.22";
 
 int main(void)
 {
@@ -141,8 +141,8 @@ int main(void)
 	NetDuke::Transport& transport = netduke.GetTransport();
 
 	NetDuke::Peer peer("0.0.0.0", 0);
-	//transport.InitTCPStack(peer);
-	transport.InitUDPStack(peer);
+	transport.InitTCPStack(peer);
+	//transport.InitUDPStack(peer);
 
 	printf("init tcp stack\n");
 
@@ -153,6 +153,7 @@ int main(void)
 	NetDuke::Serializer ser(NetDuke::Serializer::MTU);
 	ser.Write(12);
 	ser << 0;
+	ser << NetDuke::Time::GetMsTime();
 	ser.Close();
 
 	printf("end write serializer\n");
@@ -167,7 +168,7 @@ int main(void)
 	g_duke = &netduke;
 
 #if defined(EMSCRIPTEN_TARGET)
-	emscripten_set_main_loop(one_iter, 0, true);
+	emscripten_set_main_loop(one_iter, 1000000, true);
 #else
 	while(true)
 	{
@@ -181,8 +182,17 @@ int main(void)
 	return 0;
 }
 
+NetDuke::timer_t last_call = 0;
+
 void one_iter()
 {
+
+	//printf("iteration: %lld\n", NetDuke::Time::GetMsTime() - last_call);
+	//last_call = NetDuke::Time::GetMsTime();
+
+	for(size_t i = 0; i<25; ++i)
+	{
+
 	NetDuke::Peer peer_to(g_addr, 8090);
 	g_duke->Tick();
 
@@ -196,30 +206,32 @@ void one_iter()
 	
 	while(transport.Pull(ser, peer))
 	{
+		static NetDuke::timer_t timer;
 		ser.Read(12);
 		int seq;
 		static_cast<NetDuke::Serializer&>(ser) >> seq;
-		//static_cast<NetDuke::Serializer&>(ser-) >> timer;
+		static_cast<NetDuke::Serializer&>(ser) >> timer;
 		ser.Close();
+
+		if(seq % 100 == 0)
+		{
+			NetDuke::timer_t end_time = NetDuke::Time::GetMsTime() - start_time;
+			printf("bench %f\n", end_time / double(seq));
+			start_time = NetDuke::Time::GetMsTime();
+			seq = 0;
+		}
 
 		NetDuke::Serializer serSeq(NetDuke::Serializer::MTU);
 		serSeq.Write(12);
 		serSeq << ++seq;
-		//serSeq << NetDuke::Time::GetMsTime();
+		serSeq << NetDuke::Time::GetMsTime();
 		serSeq.Close();
 
 		//printf("%lld\n", NetDuke::Time::GetMsTime());
 		//printf("pong %d, %lld\n", seq, NetDuke::Time::GetMsTime() - timer);
 
-		if(seq % 1000 == 0)
-		{
-			NetDuke::timer_t end_time = NetDuke::Time::GetMsTime() - start_time;
-			printf("bench %lld\n", end_time / seq);
-		}
-
 		transport.Send(serSeq, peer_to, NetDuke::s_typeUnreliableListener);
 	}
 
-	g_duke->Tick();
-	g_duke->Tick();
+	}
 }

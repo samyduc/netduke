@@ -14,6 +14,7 @@ TCPStream::TCPStream(const Peer& _peer)
 	, m_socket(0)
 	, m_opt_compression(false)
 	, m_opt_encryption(false)
+	, m_opt_skipCRC(true)
 	, m_pool(50)
 	, m_fdmax(0)
 {
@@ -287,7 +288,13 @@ netBool TCPStream::Pack(SerializerLess& _ser, const Peer& _peer)
 	// read upper layer size, compute crc
 	//_ser.Read(s_typeListener);
 	SerializerLess upper_ser(_ser, GetHeaderSize(), _ser.GetBufferSize());
-	netU32 crc = CRC32::Compute(_ser.GetBuffer() + GetHeaderSize(), upper_ser.GetSize() - GetHeaderSize());
+
+	netU32 crc = 0;
+
+	if(!m_opt_skipCRC)
+	{
+		crc = CRC32::Compute(_ser.GetBuffer() + GetHeaderSize(), upper_ser.GetSize() - GetHeaderSize());
+	}
 
 	_ser.Write(s_typeTCPStream);
 	_ser << crc;
@@ -318,10 +325,20 @@ netBool TCPStream::UnPack(SerializerLess& _ser, const Peer& _peer)
 		{
 			// Packet seems well formed, check data crc for consitency now
 			netU32 crc_ser;
+			netU32 crc_cmp;
 			static_cast<Serializer&>(_ser) >> crc_ser;
 
 			SerializerLess upper_ser(_ser, GetHeaderSize(), _ser.GetBufferSize());
-			netU32 crc_cmp = CRC32::Compute(_ser.GetBuffer() + GetHeaderSize(), upper_ser.GetSize() - GetHeaderSize());
+
+			if(!m_opt_skipCRC)
+			{
+				crc_cmp = CRC32::Compute(_ser.GetBuffer() + GetHeaderSize(), upper_ser.GetSize() - GetHeaderSize());
+			}
+			else
+			{
+				crc_cmp = 0;
+				crc_ser = 0;
+			}
 
 			if(crc_cmp == crc_ser)
 			{

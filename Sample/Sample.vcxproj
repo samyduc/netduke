@@ -226,6 +226,8 @@
       <AdditionalDependencies>D:\dev\NetDuke\NetDuke\Emscripten\Release\NetDuke.bc;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\NetDuke\emscripten\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <LinkerOptimizationLevel>O2</LinkerOptimizationLevel>
+      <RunClosureCompiler>true</RunClosureCompiler>
+      <RunMinify>true</RunMinify>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -236,6 +238,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>..\Includes;</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;WINDOWS_TARGET;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
