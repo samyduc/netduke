@@ -110,7 +110,8 @@ netBool RPCService::Recv(SerializerLess& _ser, const Peer& _peer)
 	{
 		RPC& rpc = *(*it);
 
-		if(rpc.Out().GetType() == _ser.GetType())
+		//if(rpc.Out().GetType() == _ser.GetType())
+		if(rpc.GetType() == _ser.GetType())
 		{
 			RecvOut(rpc, _ser);
 			ret = true;

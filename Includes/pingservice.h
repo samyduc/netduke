@@ -61,11 +61,13 @@ struct PingRPCOut : public Dataset
 	}
 };
 
+static const netU32 s_PingRPC = CRC32::Compute("NetDuke::PingRPC");
+
 class PingRPC : public RPC
 {
 public:
 
-	netU32		GetType() const { return CRC32::Compute("PingRPC"); }
+	netU32		GetType() const { return s_PingRPC; }
 
 	Dataset&	In() { return m_in; }
 	Dataset&	Out() { return m_out; }

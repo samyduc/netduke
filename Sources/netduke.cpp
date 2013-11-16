@@ -84,19 +84,12 @@ void NetDuke::Tick()
 
 void NetDuke::RegisterService(Service& _service)
 {
-	//size_t index = m_services.size();
-	//_service.SetRegistrationId(index);
-
 	_service.Init();
 	m_services[_service.GetType()] = &_service;
 }
 
 void NetDuke::UnRegisterService(Service& _service)
 {
-	// find a use for this
-	//size_t index = _service.GetRegistrationId();
-	//(void)index;
-
 	services_t::iterator it = m_services.find(_service.GetType());
 
 	if(it != m_services.end())

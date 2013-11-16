@@ -45,7 +45,8 @@ protected:
 
 	void RegisterHandler(RPC& _rpc, rpchandler_t _handler_func)
 	{
-		netU32 type = _rpc.In().GetType();
+		//netU32 type = _rpc.In().GetType();
+		netU32 type = _rpc.GetType();
 		typename handlers_t::iterator it = m_handlers.find(type);
 
 		if(it == m_handlers.end())

@@ -54,7 +54,8 @@ public:
 	netBool				Serialize(Dataset& _data, netU8 _seq)
 						{ 
 							m_seq = _seq;
-							if(m_ser.Write(_data.GetType()))
+							//if(m_ser.Write(_data.GetType()))
+							if(m_ser.Write(GetType()))
 							{
 								m_ser << _seq; 
 								_data.Write(m_ser); 
@@ -66,7 +67,8 @@ public:
 
 	netBool				UnSerialize(Dataset& _data, SerializerLess& _ser)
 						{ 
-							if(_ser.Read(_data.GetType()))
+							//if(_ser.Read(_data.GetType()))
+							if(_ser.Read(GetType()))
 							{
 								static_cast<Serializer&>(_ser) >> m_seq; 
 								_data.Read(_ser); 
