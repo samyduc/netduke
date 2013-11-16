@@ -31,6 +31,7 @@ public:
 
 	void		Send(RPC& _rpc, const Peer& _peer);
 	netBool		Recv(SerializerLess& _ser, const Peer& _peer);
+	netBool		RecvHandler(SerializerLess& _ser, Peer& _peer) { return Recv(_ser, _peer); }
 
 private:
 	netBool		CheckTimeOut(RPC& _rpc);

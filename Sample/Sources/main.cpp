@@ -120,20 +120,21 @@ int main(void)
 	}*/
 
 	// thread
-	/*std::thread t1(threaded_server);
+	std::thread t1(threaded_server);
 	Sleep(50);
 
 	std::list<std::thread> threads;
-	for(size_t i = 0; i<1; ++i)
+	for(size_t i = 0; i<5; ++i)
 	{
 		threads.push_back(std::thread(threaded_client));
 	}
 
 	t1.join();
 
-	printf("helloworld");*/
+	printf("helloworld");
 
-	printf("start\n");
+	// a la mano
+	/*printf("start\n");
 
 	NetDuke::NetDuke netduke;
 	netduke.Init();
@@ -176,7 +177,7 @@ int main(void)
 		Sleep(1);
 	}
 #endif
-
+	*/
 	
 
 	return 0;

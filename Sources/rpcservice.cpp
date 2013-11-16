@@ -41,7 +41,7 @@ void RPCService::Tick()
 	while(it != m_rpcs.end())
 	{
 		RPC& rpc = *(*it);
-		if(CheckTimeOut(rpc) || rpc.GetState() == RPC::eState::STATE_DONE )
+		if(rpc.GetState() == RPC::eState::STATE_DONE || CheckTimeOut(rpc))
 		{
 			// detach rpc
 			it = m_rpcs.erase(it);
@@ -101,9 +101,9 @@ void RPCService::Send(RPC& _rpc, const Peer& _peer)
 
 netBool RPCService::Recv(SerializerLess& _ser, const Peer& _peer)
 {
-	// check if handler
 	(void)_peer;
-	// RecvIn(RPC& _rpc, SerializerLess& _ser)
+
+	netBool ret = false;
 
 	// check if response
 	for(rpcs_t::iterator it = m_rpcs.begin(); it != m_rpcs.end(); ++it)
@@ -113,11 +113,12 @@ netBool RPCService::Recv(SerializerLess& _ser, const Peer& _peer)
 		if(rpc.Out().GetType() == _ser.GetType())
 		{
 			RecvOut(rpc, _ser);
-			return true;
+			ret = true;
+			break;
 		}
 	}
 
-	return false;
+	return ret;
 }
 
 void RPCService::RecvOut(RPC& _rpc, SerializerLess& _ser)

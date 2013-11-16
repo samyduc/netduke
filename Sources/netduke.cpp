@@ -46,27 +46,16 @@ void NetDuke::Tick()
 	SerializerLess ser;
 	Peer peer;
 
-	// retrieve Out rpc
-	if(m_rpcService)
+	while(m_transport.Pull(ser, peer))
 	{
-		while(m_transport.Pull(ser, peer))
+		// rpc handler
+		for(services_t::iterator it=m_services.begin(); it!=m_services.end(); ++it)
 		{
-			if(m_rpcService->Recv(ser, peer))
-			{
-				// rpc response
-			}
-			else
-			{
-				// rpc handler
-				for(services_t::iterator it=m_services.begin(); it!=m_services.end(); ++it)
-				{
-					Service& service = *it->second;
+			Service& service = *it->second;
 
-					if(service.RecvHandler(ser, peer))
-					{
-						break;
-					}
-				}
+			if(service.RecvHandler(ser, peer))
+			{
+				break;
 			}
 		}
 	}
