@@ -1,12 +1,18 @@
 #include "netduke.h"
 
-
+#include "service.h"
+#include "rpcservice.h"
+#include "peer.h"
+#include "serializer.h"
+#include "serializerless.h"
+#include "observer.h"
 
 namespace NetDuke
 {
 
 NetDuke::NetDuke()
 	: m_rpcService(nullptr)
+	, m_observer(nullptr)
 {
 
 }
@@ -45,9 +51,11 @@ void NetDuke::Tick()
 	// poll message and distribute to services
 	SerializerLess ser;
 	Peer peer;
+	netBool isFound;
 
 	while(m_transport.Pull(ser, peer))
 	{
+		isFound = false;
 		// rpc handler
 		for(services_t::iterator it=m_services.begin(); it!=m_services.end(); ++it)
 		{
@@ -55,8 +63,14 @@ void NetDuke::Tick()
 
 			if(service.RecvHandler(ser, peer))
 			{
+				isFound = true;
 				break;
 			}
+		}
+
+		if(m_observer && isFound == false)
+		{
+			m_observer->OnUnregisteredMessage(ser, peer);
 		}
 	}
 
@@ -134,6 +148,13 @@ void NetDuke::EnableRPC(netBool _state)
 			m_rpcService = nullptr;
 		}
 	}
+}
+
+void NetDuke::RegisterObserver(IObserver* _observer)
+{
+	// check if already assigned
+	assert(m_observer == nullptr);
+	m_observer = _observer;
 }
 
 /*extern "C" {

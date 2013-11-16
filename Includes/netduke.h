@@ -3,18 +3,21 @@
 // unique incude header
 
 #include "netdef.h"
-#include "peer.h"
-#include "serializer.h"
-#include "serializerless.h"
-
 #include "transport.h"
-#include "service.h"
-#include "rpcservice.h"
+
 
 #include <map>
+#include <cassert>
 
 namespace NetDuke
 {
+
+class IObserver;
+class SerializerLess;
+class Serializer;
+class RPCService;
+class Service;
+class Peer;
 
 class NetDuke
 {
@@ -38,12 +41,17 @@ public:
 	// helper
 	void		EnableRPC(netBool _state);
 
+	// observer
+	void		RegisterObserver(IObserver* _observer);
+	IObserver*	GetObserver() { return m_observer; }
+
 private:
-	Transport m_transport;
-	RPCService *m_rpcService;
+	IObserver*	m_observer;
+	Transport	m_transport;
+	RPCService*	m_rpcService;
 
 	typedef std::map<netU32, Service*> services_t;
-	services_t m_services;
+	services_t	m_services;
 
 
 };

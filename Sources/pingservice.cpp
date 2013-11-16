@@ -2,7 +2,7 @@
 
 #include "transport.h"
 #include "timeplatform.h"
-
+#include "rpcservice.h"
 #include "serializerless.h"
 
 #include "dataset.h"
