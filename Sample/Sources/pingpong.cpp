@@ -20,6 +20,8 @@ void Log(char *fmt, ...)
 	va_end (va);*/
 }
 
+
+
 PingPongServer::PingPongServer(NetDuke::netU16 _port)
 	: PingService(nullptr)
 {
@@ -31,6 +33,7 @@ PingPongServer::PingPongServer(NetDuke::netU16 _port)
 	peer.SetIPv4Addr("0.0.0.0");
 	m_netduke->GetTransport().Listen(peer);
 	//m_netduke->GetTransport().InitTCPStack(peer);
+	m_netduke->RegisterObserver(&m_observer);
 }
 
 PingPongServer::~PingPongServer()

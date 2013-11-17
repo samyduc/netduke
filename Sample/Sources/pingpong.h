@@ -9,6 +9,21 @@
 namespace NetDukeSample
 {
 
+class Observer : public NetDuke::IObserver
+{
+public:
+	void OnUnregisteredMessage(NetDuke::SerializerLess& _ser, NetDuke::Peer& _peer)
+	{
+		printf("unknown packet !\n");
+	}
+
+	void OnPeerRemoved(const NetDuke::Peer& _peer)
+	{
+		printf("peer removed\n");
+	}
+
+};
+
 class PingPongServer : public NetDuke::PingService
 {
 
@@ -22,7 +37,7 @@ public:
 	void Tick();
 
 	NetDuke::NetDuke&	GetNetDuke() { return *m_netduke; }
-
+	Observer	m_observer;
 
 };
 
