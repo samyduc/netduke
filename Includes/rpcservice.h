@@ -20,6 +20,7 @@ static const netU32 s_RPCService = CRC32::Compute("RPCService");
 class RPCService : public Service
 {
 public:
+
 	explicit	RPCService(NetDuke* _netduke);
 				~RPCService();
 

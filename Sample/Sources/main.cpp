@@ -129,7 +129,8 @@ int main(void)
 		threads.push_back(std::thread(threaded_client));
 	}
 
-	t1.join();
+	//t1.join();
+	threads.front().join();
 
 	printf("helloworld");
 

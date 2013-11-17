@@ -84,6 +84,7 @@ void RPCService::Send(RPC& _rpc, const Peer& _peer)
 	netU8 seq = GetNextSequence();
 	_rpc.Serialize(_rpc.In(), seq);
 	_rpc.ChangeState(RPC::eState::STATE_SENDING);
+	_rpc.SetStartTime(Time::GetMsTime());
 
 	m_rpcs.push_back(&_rpc);
 

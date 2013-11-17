@@ -14,6 +14,8 @@ class RPC
 {
 public:
 
+	friend class RPCService;
+
 	enum eState
 	{
 		STATE_UNDEFINED,
@@ -78,7 +80,7 @@ public:
 							return false;
 						}
 
-	netBool				IsTimeOut() const { return (m_start_time + m_timeout_time > Time::GetMsTime()); }
+	netBool				IsTimeOut() const { return ((m_start_time + m_timeout_time) < Time::GetMsTime()); }
 	netBool				IsComplete() const { return m_state==STATE_DONE; }
 	netBool				IsSuccess() const { return m_error==ERROR_OK; }
 
@@ -95,6 +97,8 @@ public:
 	}
 	 
 private:
+	void		SetTimeOutTime(timer_t _ms) { m_timeout_time = _ms; } 
+	void		SetStartTime(timer_t _ms) { m_start_time = _ms; } 
 
 private:
 	netU8		m_seq;
