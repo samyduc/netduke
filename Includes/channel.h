@@ -31,11 +31,10 @@ public:
 	const Peer&			GetPeer() const {return m_peer;}
 
 private:
-
-	Peer m_peer;
+	Peer				m_peer;
 
 	typedef std::queue<SerializerLess> serializers_t;
-	serializers_t m_serializers;
+	serializers_t		m_serializers;
 
 
 };

@@ -148,6 +148,8 @@ void NetDuke::RegisterObserver(IObserver* _observer)
 	// check if already assigned
 	assert(m_observer == nullptr);
 	m_observer = _observer;
+
+	m_transport.RegisterObserver(m_observer);
 }
 
 /*extern "C" {

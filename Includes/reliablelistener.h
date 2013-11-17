@@ -136,6 +136,7 @@ public:
 	void					UnRegisterStream(const Stream& _stream);
 
 	void					SetTimeOut(timer_t _ms);
+	void					DeletePeer(const Peer& _peer);
 
 protected:
 	netBool					Pack(SerializerLess& _ser, const Peer& _peer);

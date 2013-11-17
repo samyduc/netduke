@@ -74,27 +74,27 @@ protected:
 	struct ConnectionPacker*	GetConnection(const Peer& _peer);
 
 	void						CheckIncomingPacket(size_t _len, ConnectionPacker& _connection, Serializer& _ser, const Peer& _peer);
+	void						DeletePeer(const Peer& _peer);
 
 private:
 
-	netBool		m_isValid;
-	netBool		m_opt_compression;
-	netBool		m_opt_encryption;
-	netBool		m_opt_skipCRC;
+	netBool						m_isValid;
+	netBool						m_opt_compression;
+	netBool						m_opt_encryption;
+	netBool						m_opt_skipCRC;
 
-	const Peer	m_peer;
-	SOCKET		m_socket;
+	const Peer					m_peer;
+	SOCKET						m_socket;
+	SOCKET						m_fdmax;
 
-	channels_t	m_sendChannels;
+	channels_t					m_sendChannels;
 
-	SerializerPool	m_pool;
+	SerializerPool				m_pool;
 
-	listeners_t m_listeners;
+	listeners_t					m_listeners;
 
 	typedef std::map<Peer, struct ConnectionPacker*> connections_t;
-	connections_t m_connections;
-
-	SOCKET m_fdmax;
+	connections_t				m_connections;
 
 
 

@@ -284,6 +284,17 @@ netBool UDPStream::AttachListener(Listener& _listener)
 	return is_valid;
 }
 
+void UDPStream::DeletePeer(const Peer& _peer)
+{
+	channels_t::iterator it_channel = m_sendChannels.find(_peer);
+	if(it_channel != m_sendChannels.end())
+	{
+		Channel *channel = (*it_channel).second;
+		delete channel;
+		m_sendChannels.erase(it_channel);
+	}
+}
+
 netBool UDPStream::DetachListener(Listener& _listener)
 {
 	netBool is_valid = false;

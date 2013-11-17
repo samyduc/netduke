@@ -52,6 +52,8 @@ public:
 	netBool			AttachListener(Listener& _listener);
 	netBool			DetachListener(Listener& _listener);
 
+	void			DeletePeer(const Peer& _peer);
+
 protected:
 	netBool			Pack(SerializerLess& _ser, const Peer& _peer);
 	netBool			UnPack(SerializerLess& _ser, const Peer& _peer);
@@ -61,18 +63,18 @@ protected:
 
 private:
 
-	netBool		m_isValid;
-	netBool		m_opt_compression;
-	netBool		m_opt_encryption;
+	netBool			m_isValid;
+	netBool			m_opt_compression;
+	netBool			m_opt_encryption;
 
-	const Peer	m_peer;
-	SOCKET		m_socket;
+	const Peer		m_peer;
+	SOCKET			m_socket;
 
-	channels_t	m_sendChannels;
+	channels_t		m_sendChannels;
 
 	SerializerPool	m_pool;
 
-	listeners_t m_listeners;
+	listeners_t		m_listeners;
 };
 
 };	

@@ -452,6 +452,25 @@ netBool TCPStream::Connect(const Peer& _peer)
 	return result == 0;
 }
 
+void TCPStream::DeletePeer(const Peer& _peer)
+{
+	channels_t::iterator it_channel = m_sendChannels.find(_peer);
+	if(it_channel != m_sendChannels.end())
+	{
+		Channel *channel = (*it_channel).second;
+		delete channel;
+		m_sendChannels.erase(it_channel);
+	}
+
+	connections_t::iterator it_connection = m_connections.find(_peer);
+	if(it_connection != m_connections.end())
+	{
+		ConnectionPacker *connection = (*it_connection).second;
+		delete connection;
+		m_connections.erase(it_connection);
+	}
+}
+
 struct ConnectionPacker* TCPStream::GetOrCreateConnection(const Peer& _peer)
 {
 	struct ConnectionPacker* connection = GetConnection(_peer);

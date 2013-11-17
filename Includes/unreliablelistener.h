@@ -36,6 +36,8 @@ public:
 	void		RegisterStream(Stream& _stream);
 	void		UnRegisterStream(const Stream& _stream);
 
+	void		DeletePeer(const Peer& _peer);
+
 protected:
 	netBool		Pack(SerializerLess& _ser, const Peer& _peer);
 	netBool		UnPack(SerializerLess& _ser, const Peer& _peer);

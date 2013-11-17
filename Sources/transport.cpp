@@ -33,6 +33,8 @@ void Transport::Tick()
 		Listener *listener = (*it);
 		listener->Tick();
 	}
+
+	CheckTimeOutClients();
 }
 
 Listener* Transport::GetListener(netU32 _type) const
@@ -85,7 +87,7 @@ void Transport::InitTCPStack(const Peer &_peer)
 	//
 	m_streams.push_back(tcpstream);
 
-	// create listener - note: we do not need reliable listener on udp
+	// create listener - note: we do not need reliable listener on tcp
 	UnreliableListener *unreliablelistener = new UnreliableListener();
 	m_listeners.push_back(unreliablelistener);
 	
@@ -152,6 +154,11 @@ void Transport::Send(Serializer& _ser, const Peer& _peer, netU32 _type)
 		// unavailable transport
 		assert(false);
 	}
+
+	// update stats
+	struct Activity* activity = GetActivity(_peer);
+	activity->m_lastSend = Time::GetMsTime();
+	activity->m_nbSend++;
 }
 
 netBool Transport::Push(SerializerLess &_ser, const Peer& _peer)
@@ -171,11 +178,77 @@ netBool Transport::Pull(SerializerLess &_ser, Peer& _peer)
 		if(listener->Pull(_ser, _peer))
 		{
 			isFound = true;
+
+			// update stats
+			struct Activity* activity = GetActivity(_peer);
+			activity->m_lastRecv = Time::GetMsTime();
+			activity->m_nbRecv++;
+
 			break;
 		}
 	}
 
 	return isFound;
+}
+
+void Transport::RegisterObserver(IObserver* _observer)
+{
+	Layer::RegisterObserver(_observer);
+
+	for(listeners_t::iterator it=m_listeners.begin(); it != m_listeners.end(); ++it)
+	{
+		Listener* listener = (*it);
+		listener->RegisterObserver(_observer);
+	}
+
+	for(streams_t::iterator it=m_streams.begin(); it != m_streams.end(); ++it)
+	{
+		Stream* stream = (*it);
+		stream->RegisterObserver(_observer);
+	}
+}
+
+void Transport::CheckTimeOutClients()
+{
+	activities_t::iterator it = m_activities.begin();
+	timer_t now = Time::GetMsTime();
+
+	while(it != m_activities.end())
+	{
+		struct Activity* activity = it->second;
+
+		if((now - activity->m_lastRecv ) > m_timeoutPeer && (activity->m_creation + m_timeoutPeer) < now)
+		{
+			DeletePeer(activity->m_peer);
+
+			if(m_observer)
+			{
+				m_observer->OnPeerRemoved(activity->m_peer);
+			}
+
+			delete activity;
+			it = m_activities.erase(it);
+		}
+		else
+		{
+			++it;
+		}
+	}
+}
+
+void Transport::DeletePeer(const Peer& _peer)
+{
+	for(listeners_t::iterator it=m_listeners.begin(); it != m_listeners.end(); ++it)
+	{
+		Listener* listener = (*it);
+		listener->DeletePeer(_peer);
+	}
+
+	for(streams_t::iterator it=m_streams.begin(); it != m_streams.end(); ++it)
+	{
+		Stream* stream = (*it);
+		stream->DeletePeer(_peer);
+	}
 }
 
 void Transport::InitPlatform()
@@ -185,6 +258,25 @@ void Transport::InitPlatform()
 		//FD_ZERO(&m_readfs);
 		s_IsPlatformInit = InitPlatformPrivate();
 	}
+}
+
+struct Activity* Transport::GetActivity(const Peer&_peer)
+{
+	struct Activity* activity = nullptr;
+	activities_t::iterator it = m_activities.find(_peer);
+
+	if(it != m_activities.end())
+	{
+		activity = it->second;
+	}
+	else
+	{
+		activity = new struct Activity(_peer);
+		m_activities[_peer] = activity;
+	}
+
+	assert(activity);
+	return activity;
 }
 
 void Transport::DesInitPlatform()
@@ -203,6 +295,12 @@ void Transport::DesInitPlatform()
 			delete (*it);
 		}
 		m_listeners.clear();
+
+		for(activities_t::iterator it=m_activities.begin(); it != m_activities.end(); ++it)
+		{
+			delete it->second;
+		}
+		m_activities.clear();
 		
 
 		//FD_ZERO(&m_readfs);

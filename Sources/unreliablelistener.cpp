@@ -212,6 +212,24 @@ Channel& UnreliableListener::GetChannel(channels_t& channels, const Peer& _peer)
 	return *channel_out;
 }
 
+void UnreliableListener::DeletePeer(const Peer& _peer)
+{
+	channels_t::iterator it_channel = m_sendChannels.find(_peer);
+	if(it_channel != m_sendChannels.end())
+	{
+		Channel *channel = (*it_channel).second;
+		delete channel;
+		m_sendChannels.erase(it_channel);
+	}
+
+	channels_t::iterator it_channel_rcv = m_recvChannels.find(_peer);
+	if(it_channel_rcv != m_recvChannels.end())
+	{
+		Channel *channel = (*it_channel_rcv).second;
+		delete channel;
+		m_recvChannels.erase(it_channel_rcv);
+	}
+}
 
 
 
