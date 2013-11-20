@@ -114,8 +114,7 @@ netBool RPCService::Recv(SerializerLess& _ser, const Peer& _peer)
 		//if(rpc.Out().GetType() == _ser.GetType())
 		if(rpc.GetType() == _ser.GetType())
 		{
-			RecvOut(rpc, _ser);
-			ret = true;
+			ret = RecvOut(rpc, _ser);
 			break;
 		}
 	}
@@ -123,19 +122,16 @@ netBool RPCService::Recv(SerializerLess& _ser, const Peer& _peer)
 	return ret;
 }
 
-void RPCService::RecvOut(RPC& _rpc, SerializerLess& _ser)
+netBool RPCService::RecvOut(RPC& _rpc, SerializerLess& _ser)
 {
-	_rpc.ChangeState(RPC::eState::STATE_DONE);
-
 	netBool ret = _rpc.UnSerialize(_rpc.Out(), _ser);
 	if(ret)
 	{
+		_rpc.ChangeState(RPC::eState::STATE_DONE);
 		_rpc.ChangeError(RPC::eError::ERROR_OK);
 	}
-	else
-	{
-		_rpc.ChangeError(RPC::eError::ERROR_KO);
-	}
+
+	return ret;
 }
 
 

@@ -7,6 +7,7 @@
 
 
 #include <map>
+#include <list>
 #include <cassert>
 
 namespace NetDuke
@@ -18,6 +19,7 @@ class Serializer;
 class RPCService;
 class Service;
 class Peer;
+
 
 class NetDuke
 {
@@ -50,7 +52,7 @@ private:
 	Transport	m_transport;
 	RPCService*	m_rpcService;
 
-	typedef std::map<netU32, Service*> services_t;
+	typedef std::list<Service*> services_t;
 	services_t	m_services;
 
 

@@ -38,7 +38,7 @@ private:
 	netBool		CheckTimeOut(RPC& _rpc);
 	netU8		GetNextSequence();
 
-	void		RecvOut(RPC& _rpc, SerializerLess& _ser);
+	netBool		RecvOut(RPC& _rpc, SerializerLess& _ser);
 
 private:
 	

@@ -59,6 +59,7 @@ public:
 							//if(m_ser.Write(_data.GetType()))
 							if(m_ser.Write(GetType()))
 							{
+								m_ser << _data.GetType();
 								m_ser << _seq; 
 								_data.Write(m_ser); 
 								m_ser.Close();
@@ -69,15 +70,23 @@ public:
 
 	netBool				UnSerialize(Dataset& _data, SerializerLess& _ser)
 						{ 
+							netBool ret = false;
 							//if(_ser.Read(_data.GetType()))
 							if(_ser.Read(GetType()))
 							{
-								static_cast<Serializer&>(_ser) >> m_seq; 
-								_data.Read(_ser); 
+								netU32 type;
+								static_cast<Serializer&>(_ser) >> type;
+
+								if(type == _data.GetType())
+								{
+									static_cast<Serializer&>(_ser) >> m_seq; 
+									_data.Read(_ser); 
+									ret = true;
+								}
 								_ser.Close();
-								return true;
 							}
-							return false;
+
+							return ret;
 						}
 
 	netBool				IsTimeOut() const { return ((m_start_time + m_timeout_time) < Time::GetMsTime()); }

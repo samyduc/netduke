@@ -35,7 +35,7 @@ void NetDuke::DeInit()
 	// delete services
 	for(services_t::iterator it=m_services.begin(); it!=m_services.end(); ++it)
 	{
-		Service& service = *(it->second);
+		Service& service = *(*it);
 		service.DeInit();
 	}
 
@@ -59,7 +59,7 @@ void NetDuke::Tick()
 		// rpc handler
 		for(services_t::iterator it=m_services.begin(); it!=m_services.end(); ++it)
 		{
-			Service& service = *it->second;
+			Service& service = *(*it);
 
 			if(service.RecvHandler(ser, peer))
 			{
@@ -77,7 +77,7 @@ void NetDuke::Tick()
 	// tick service logic
 	for(services_t::iterator it=m_services.begin(); it!=m_services.end(); ++it)
 	{
-		Service* service = it->second;
+		Service* service = (*it);
 		service->Tick();
 	}
 }
@@ -85,18 +85,21 @@ void NetDuke::Tick()
 void NetDuke::RegisterService(Service& _service)
 {
 	_service.Init();
-	m_services[_service.GetType()] = &_service;
+	m_services.push_back(&_service);
 }
 
 void NetDuke::UnRegisterService(Service& _service)
 {
-	services_t::iterator it = m_services.find(_service.GetType());
-
-	if(it != m_services.end())
+	for(services_t::iterator it = m_services.begin(); it != m_services.end(); ++it)
 	{
-		Service& service = *(it->second);
-		service.DeInit();
-		m_services.erase(it);
+		Service* serv = (*it);
+
+		if(serv->GetType() == _service.GetType())
+		{
+			_service.DeInit();
+			m_services.erase(it);
+			break;
+		}
 	}
 }
 
@@ -104,11 +107,15 @@ Service* NetDuke::GetService(netU32 _type)
 {
 	Service* service = nullptr;
 
-	services_t::iterator it = m_services.find(_type);
-
-	if(it != m_services.end())
+	for(services_t::iterator it = m_services.begin(); it != m_services.end(); ++it)
 	{
-		service = it->second;
+		Service* serv = (*it);
+
+		if(serv->GetType() == _type)
+		{
+			service = serv;
+			break;
+		}
 	}
 
 	return service;
@@ -124,8 +131,9 @@ void NetDuke::EnableRPC(netBool _state)
 			Service* service = GetService(s_RPCService);
 			assert(service == nullptr);
 
+			// rpc service must be first in lane
 			m_rpcService = new RPCService(this);
-			RegisterService(*m_rpcService);
+			m_services.push_front(m_rpcService);
 		}
 	}
 	else
