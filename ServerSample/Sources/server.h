@@ -1,8 +1,9 @@
 #pragma once
 
 #include "netduke.h"
-
 #include "pingservice.h"
+
+#include "server.h"
 
 #include <ctime>
 
@@ -37,28 +38,12 @@ public:
 	void Tick();
 
 	NetDuke::NetDuke&	GetNetDuke() { return *m_netduke; }
-	Observer	m_observer;
 
-};
-
-class PingPongClient : public NetDuke::PingService
-{
-public:
-	explicit PingPongClient(const NetDuke::netChar* _addr, NetDuke::netU16 _port);
-	~PingPongClient();
-
-	void Init();
-	void DeInit();
-
-	void Tick();
-
-	NetDuke::NetDuke&	GetNetDuke() { return *m_netduke; }
+	virtual NetDuke::netBool	OnRecvPing(NetDuke::Peer& _peer);
 
 private:
 	Observer	m_observer;
 
-	NetDuke::Peer m_peer;
-	NetDuke::PingRPC m_rpc2;
 };
 
 

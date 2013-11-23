@@ -4,6 +4,8 @@
 #include <mutex>
 #include <iostream>
 
+#include "rpcservice.h"
+
 namespace NetDukeSample
 {
 
@@ -69,6 +71,7 @@ PingPongClient::PingPongClient(const NetDuke::netChar* _addr, NetDuke::netU16 _p
 
 	m_peer.SetIPv4Addr(_addr);
 	m_peer.SetPort(_port);
+	m_netduke->RegisterObserver(&m_observer);
 }
 
 PingPongClient::~PingPongClient()
@@ -103,6 +106,20 @@ void PingPongClient::Tick()
 	{
 		// first send
 		SendPing(m_peer);
+
+		m_rpc2.m_in.m_time = 69;
+		NetDuke::RPCService* service = m_netduke->GetRPCService();
+		service->Send(m_rpc2, m_peer);
+	}
+
+	if(m_rpc2.IsComplete())
+	{
+		if(m_rpc2.IsSuccess())
+		{
+			//NetDuke::RPCService* service = m_netduke->GetRPCService();
+			//service->Send(m_rpc2, m_peer);
+		}
+
 	}
 }
 

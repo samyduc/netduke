@@ -99,6 +99,7 @@ void Transport::InitUDPStack(const Peer &_peer)
 {
 	assert(s_IsPlatformInit);
 
+	m_tcpMode = false;
 	// create stream
 	UDPStream *udpstream = new UDPStream(_peer);
 	udpstream->CreateAndBind();

@@ -120,11 +120,11 @@ int main(void)
 	}*/
 
 	// thread
-	std::thread t1(threaded_server);
-	Sleep(50);
+	//std::thread t1(threaded_server);
+	//Sleep(50);
 
 	std::list<std::thread> threads;
-	for(size_t i = 0; i<5; ++i)
+	for(size_t i = 0; i<1; ++i)
 	{
 		threads.push_back(std::thread(threaded_client));
 	}

@@ -92,11 +92,11 @@ void RPCService::Send(RPC& _rpc, const Peer& _peer)
 
 	if(transport.IsTCPEnabled())
 	{
-		m_netduke->GetTransport().Send(_rpc.GetSerializer(), _peer, s_typeUnreliableListener);
+		transport.Send(_rpc.GetSerializer(), _peer, s_typeUnreliableListener);
 	}
 	else
 	{
-		m_netduke->GetTransport().Send(_rpc.GetSerializer(), _peer, s_typeReliableListener);
+		transport.Send(_rpc.GetSerializer(), _peer, s_typeReliableListener);
 	}
 }
 
@@ -107,7 +107,8 @@ netBool RPCService::Recv(SerializerLess& _ser, const Peer& _peer)
 	netBool ret = false;
 
 	// check if response
-	for(rpcs_t::iterator it = m_rpcs.begin(); it != m_rpcs.end(); ++it)
+	rpcs_t::iterator it = m_rpcs.begin();
+	while(it != m_rpcs.end())
 	{
 		RPC& rpc = *(*it);
 
@@ -115,8 +116,10 @@ netBool RPCService::Recv(SerializerLess& _ser, const Peer& _peer)
 		if(rpc.GetType() == _ser.GetType())
 		{
 			ret = RecvOut(rpc, _ser);
+			m_rpcs.erase(it);
 			break;
 		}
+		++it;
 	}
 
 	return ret;
