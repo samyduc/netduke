@@ -47,8 +47,6 @@ public:
 
 private:
 	netBool		CheckTimeOut(RPC& _rpc);
-	netU8		GetNextSequence();
-
 	netBool		RecvOut(RPC& _rpc, SerializerLess& _ser);
 
 	struct RPCChannel* GetRPCChannel(const Peer& _peer);
@@ -57,8 +55,6 @@ private:
 	
 	typedef std::map<Peer, struct RPCChannel*> rpcChannel_t;
 	rpcChannel_t m_rpcs;
-
-	netU8	m_seq;
 
 };
 

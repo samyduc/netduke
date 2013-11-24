@@ -9,7 +9,6 @@ namespace NetDuke
 
 RPCService::RPCService(NetDuke* _netduke)
 	: Service(_netduke)
-	, m_seq(0)
 {
 }
 
@@ -108,24 +107,10 @@ netBool RPCService::CheckTimeOut(RPC& _rpc)
 	return is_timeout;
 }
 
-netU8 RPCService::GetNextSequence()
-{
-	if(m_seq == 0xFF)
-	{
-		m_seq = 0;
-	}
-	else
-	{
-		++m_seq;
-	}
-
-	return m_seq;
-}
 
 void RPCService::Send(RPC& _rpc, const Peer& _peer)
 {
-	netU8 seq = GetNextSequence();
-	_rpc.Serialize(_rpc.In(), seq);
+	_rpc.Serialize(_rpc.In());
 	_rpc.ChangeState(RPC::eState::STATE_SENDING);
 	_rpc.SetStartTime(Time::GetMsTime());
 

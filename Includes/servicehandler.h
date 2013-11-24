@@ -96,7 +96,7 @@ protected:
 			if(ret)
 			{
 				// send response
-				handler.m_rpc->Serialize(handler.m_rpc->Out(), handler.m_rpc->GetSequence());
+				handler.m_rpc->Serialize(handler.m_rpc->Out());
 
 				Transport& transport = m_netduke->GetTransport();
 
