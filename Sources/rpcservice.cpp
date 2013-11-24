@@ -86,7 +86,7 @@ void RPCService::Tick()
 
 			while(rpc)
 			{
-				if(CheckTimeOut(*rpc))
+				if(rpc->IsTimeOut())
 				{
 					channel.m_rpcs.pop();
 
@@ -109,18 +109,6 @@ void RPCService::Tick()
 		++it;
 	}
 
-}
-
-netBool RPCService::CheckTimeOut(RPC& _rpc)
-{
-	netBool is_timeout = _rpc.IsTimeOut();
-	if(is_timeout)
-	{
-		_rpc.ChangeState(RPC::eState::STATE_DONE);
-		_rpc.ChangeError(RPC::eError::ERROR_TIME_OUT);
-	}
-
-	return is_timeout;
 }
 
 

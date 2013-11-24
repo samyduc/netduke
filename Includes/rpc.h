@@ -85,8 +85,23 @@ public:
 							return ret;
 						}
 
-	netBool				IsTimeOut() const { return ((m_start_time + m_timeout_time) < Time::GetMsTime()); }
-	netBool				IsComplete() const { return m_state==STATE_DONE || !IsTimeOut(); }
+	netBool				IsTimeOut()
+	{ 
+		netBool ret = false;
+		if((m_start_time + m_timeout_time) < Time::GetMsTime())
+		{
+			if(m_state == STATE_SENDING || m_state == STATE_RECEIVING)
+			{
+				ChangeState(RPC::eState::STATE_DONE);
+				ChangeError(RPC::eError::ERROR_TIME_OUT);
+				ret = true;
+			}
+		}
+
+		return ret; 
+	}
+
+	netBool				IsComplete() { return m_state==STATE_DONE || IsTimeOut(); }
 	netBool				IsSuccess() const { return m_error==ERROR_OK; }
 
 	Serializer&			GetSerializer() { return m_ser; }

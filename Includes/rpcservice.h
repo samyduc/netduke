@@ -46,7 +46,6 @@ public:
 	netBool		RecvHandler(SerializerLess& _ser, Peer& _peer) { return Recv(_ser, _peer); }
 
 private:
-	netBool		CheckTimeOut(RPC& _rpc);
 	netBool		RecvOut(RPC& _rpc, SerializerLess& _ser);
 
 	struct RPCChannel* GetRPCChannel(const Peer& _peer);
