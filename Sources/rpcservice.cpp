@@ -34,7 +34,15 @@ void RPCService::DeInit()
 				rpc->ChangeError(RPC::eError::ERROR_CANCEL);
 
 				channel->m_rpcs.pop();
-				rpc = channel->m_rpcs.front();
+
+				if(!channel->m_rpcs.empty())
+				{
+					rpc = channel->m_rpcs.front();
+				}
+				else
+				{
+					rpc = nullptr;
+				}
 			}
 		}
 
@@ -81,7 +89,15 @@ void RPCService::Tick()
 				if(CheckTimeOut(*rpc))
 				{
 					channel.m_rpcs.pop();
-					rpc = channel.m_rpcs.front();
+
+					if(!channel.m_rpcs.empty())
+					{
+						rpc = channel.m_rpcs.front();
+					}
+					else
+					{
+						rpc = nullptr;
+					}
 				}
 				else
 				{
