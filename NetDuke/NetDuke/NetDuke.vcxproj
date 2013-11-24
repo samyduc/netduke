@@ -293,6 +293,7 @@
     <ClInclude Include="..\..\Includes\observer.h" />
     <ClInclude Include="..\..\Includes\peer.h" />
     <ClInclude Include="..\..\Includes\pingservice.h" />
+    <ClInclude Include="..\..\Includes\privateobserver.h" />
     <ClInclude Include="..\..\Includes\reliablelistener.h" />
     <ClInclude Include="..\..\Includes\rpc.h" />
     <ClInclude Include="..\..\Includes\rpcservice.h" />
@@ -371,6 +372,7 @@
     <ClCompile Include="..\..\Sources\netduke.cpp" />
     <ClCompile Include="..\..\Sources\peer.cpp" />
     <ClCompile Include="..\..\Sources\pingservice.cpp" />
+    <ClCompile Include="..\..\Sources\privateobserver.cpp" />
     <ClCompile Include="..\..\Sources\reliablelistener.cpp" />
     <ClCompile Include="..\..\Sources\rpcservice.cpp" />
     <ClCompile Include="..\..\Sources\serializer.cpp" />

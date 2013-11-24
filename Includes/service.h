@@ -3,6 +3,8 @@
 #include "netdef.h"
 #include "layer.h"
 
+#include "observer.h"
+
 #include "serializerless.h"
 #include "peer.h"
 
@@ -17,7 +19,7 @@ class SerializerLess;
 class Peer;
 
 
-class Service
+class Service : public IObserver
 {
 public:
 

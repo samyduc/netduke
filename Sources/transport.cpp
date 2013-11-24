@@ -93,6 +93,8 @@ void Transport::InitTCPStack(const Peer &_peer)
 	
 	// attach
 	tcpstream->AttachListener(*unreliablelistener);
+
+	RegisterObserver(m_observer);
 }
 
 void Transport::InitUDPStack(const Peer &_peer)
@@ -115,6 +117,8 @@ void Transport::InitUDPStack(const Peer &_peer)
 	// attach
 	udpstream->AttachListener(*unreliablelistener);
 	udpstream->AttachListener(*reliablelistener);
+
+	RegisterObserver(m_observer);
 }
 
 void Transport::Listen(const Peer &_peer)

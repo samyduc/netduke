@@ -49,6 +49,10 @@ private:
 	netBool		RecvOut(RPC& _rpc, SerializerLess& _ser);
 
 	struct RPCChannel* GetRPCChannel(const Peer& _peer);
+	void		CleanChannel(struct RPCChannel& _channel);
+
+	// observer
+	void		OnPeerRemoved(const Peer& _peer);
 
 private:
 	

@@ -23,34 +23,52 @@ void RPCService::DeInit()
 	while(it != m_rpcs.end())
 	{
 		struct RPCChannel* channel = it->second;
-
-		if(!channel->m_rpcs.empty())
-		{
-			RPC* rpc = channel->m_rpcs.front();
-
-			while(rpc)
-			{
-				rpc->ChangeState(RPC::eState::STATE_DONE);
-				rpc->ChangeError(RPC::eError::ERROR_CANCEL);
-
-				channel->m_rpcs.pop();
-
-				if(!channel->m_rpcs.empty())
-				{
-					rpc = channel->m_rpcs.front();
-				}
-				else
-				{
-					rpc = nullptr;
-				}
-			}
-		}
-
+		CleanChannel(*channel);
 		delete channel;	
+
 		++it;
 	}
 
 	m_rpcs.clear();
+}
+
+void RPCService::OnPeerRemoved(const Peer& _peer)
+{
+	rpcChannel_t::iterator it = m_rpcs.find(_peer);
+
+	if(it != m_rpcs.end())
+	{
+		struct RPCChannel* channel = it->second;
+		CleanChannel(*channel);
+		delete channel;
+
+		m_rpcs.erase(it);
+	}
+}
+
+void RPCService::CleanChannel(struct RPCChannel& _channel)
+{
+	if(!_channel.m_rpcs.empty())
+	{
+		RPC* rpc = _channel.m_rpcs.front();
+
+		while(rpc)
+		{
+			rpc->ChangeState(RPC::eState::STATE_DONE);
+			rpc->ChangeError(RPC::eError::ERROR_CANCEL);
+
+			_channel.m_rpcs.pop();
+
+			if(!_channel.m_rpcs.empty())
+			{
+				rpc = _channel.m_rpcs.front();
+			}
+			else
+			{
+				rpc = nullptr;
+			}
+		}
+	}
 }
 
 RPCService::~RPCService()
@@ -60,21 +78,6 @@ RPCService::~RPCService()
 
 void RPCService::Tick()
 {
-	/*rpcs_t::iterator it = m_rpcs.begin();
-	while(it != m_rpcs.end())
-	{
-		RPC& rpc = *(*it);
-		if(rpc.GetState() == RPC::eState::STATE_DONE || CheckTimeOut(rpc))
-		{
-			// detach rpc
-			it = m_rpcs.erase(it);
-		}
-		else
-		{
-			++it;
-		}
-	}*/
-
 	rpcChannel_t::iterator it = m_rpcs.begin();
 	while(it != m_rpcs.end())
 	{
@@ -108,7 +111,6 @@ void RPCService::Tick()
 
 		++it;
 	}
-
 }
 
 

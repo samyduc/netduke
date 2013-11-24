@@ -6,15 +6,17 @@
 #include "serializer.h"
 #include "serializerless.h"
 #include "observer.h"
+#include "privateobserver.h"
 
 namespace NetDuke
 {
 
 NetDuke::NetDuke()
 	: m_rpcService(nullptr)
-	, m_observer(nullptr)
+	, m_publicObserver(nullptr)
 {
-
+	// safe 
+	m_privateObserver = new PrivateObserver(this);
 }
 
 NetDuke::~NetDuke()
@@ -24,6 +26,7 @@ NetDuke::~NetDuke()
 
 void NetDuke::Init()
 {
+	m_transport.RegisterObserver(m_privateObserver);
 	m_transport.InitPlatform();
 }
 
@@ -68,9 +71,9 @@ void NetDuke::Tick()
 			}
 		}
 
-		if(m_observer && isFound == false)
+		if(!isFound)
 		{
-			m_observer->OnUnregisteredMessage(ser, peer);
+			m_privateObserver->OnUnregisteredMessage(ser, peer);
 		}
 	}
 
@@ -154,10 +157,8 @@ void NetDuke::EnableRPC(netBool _state)
 void NetDuke::RegisterObserver(IObserver* _observer)
 {
 	// check if already assigned
-	assert(m_observer == nullptr);
-	m_observer = _observer;
-
-	m_transport.RegisterObserver(m_observer);
+	assert(m_publicObserver == nullptr);
+	m_publicObserver = _observer;
 }
 
 /*extern "C" {
