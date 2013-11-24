@@ -8,6 +8,8 @@
 #include "rpc.h"
 
 #include <list>
+#include <map>
+#include <queue>
 
 namespace NetDuke
 {
@@ -16,6 +18,15 @@ class NetDuke;
 class Peer;
 
 static const netU32 s_RPCService = CRC32::Compute("RPCService");
+
+typedef std::queue<RPC*> rpcsQueue_t;
+
+struct RPCChannel
+{
+	RPCChannel(const Peer& _peer) : m_peer(_peer) {}
+	Peer m_peer;
+	rpcsQueue_t m_rpcs;
+};
 
 class RPCService : public Service
 {
@@ -40,10 +51,12 @@ private:
 
 	netBool		RecvOut(RPC& _rpc, SerializerLess& _ser);
 
+	struct RPCChannel* GetRPCChannel(const Peer& _peer);
+
 private:
 	
-	typedef std::list<RPC*> rpcs_t;
-	rpcs_t m_rpcs;
+	typedef std::map<Peer, struct RPCChannel*> rpcChannel_t;
+	rpcChannel_t m_rpcs;
 
 	netU8	m_seq;
 

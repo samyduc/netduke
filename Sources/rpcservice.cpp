@@ -20,11 +20,27 @@ void RPCService::Init()
 
 void RPCService::DeInit()
 {
-	for(rpcs_t::iterator it = m_rpcs.begin(); it != m_rpcs.end(); ++it)
+	rpcChannel_t::iterator it = m_rpcs.begin();
+	while(it != m_rpcs.end())
 	{
-		RPC& rpc = *(*it);
-		rpc.ChangeState(RPC::eState::STATE_DONE);
-		rpc.ChangeError(RPC::eError::ERROR_CANCEL);
+		struct RPCChannel* channel = it->second;
+
+		if(!channel->m_rpcs.empty())
+		{
+			RPC* rpc = channel->m_rpcs.front();
+
+			while(rpc)
+			{
+				rpc->ChangeState(RPC::eState::STATE_DONE);
+				rpc->ChangeError(RPC::eError::ERROR_CANCEL);
+
+				channel->m_rpcs.pop();
+				rpc = channel->m_rpcs.front();
+			}
+		}
+
+		delete channel;	
+		++it;
 	}
 
 	m_rpcs.clear();
@@ -37,7 +53,7 @@ RPCService::~RPCService()
 
 void RPCService::Tick()
 {
-	rpcs_t::iterator it = m_rpcs.begin();
+	/*rpcs_t::iterator it = m_rpcs.begin();
 	while(it != m_rpcs.end())
 	{
 		RPC& rpc = *(*it);
@@ -50,7 +66,34 @@ void RPCService::Tick()
 		{
 			++it;
 		}
+	}*/
+
+	rpcChannel_t::iterator it = m_rpcs.begin();
+	while(it != m_rpcs.end())
+	{
+		struct RPCChannel& channel = *(it->second);
+
+		if(!channel.m_rpcs.empty())
+		{
+			RPC* rpc = channel.m_rpcs.front();
+
+			while(rpc)
+			{
+				if(CheckTimeOut(*rpc))
+				{
+					channel.m_rpcs.pop();
+					rpc = channel.m_rpcs.front();
+				}
+				else
+				{
+					break;
+				}
+			}
+		}
+
+		++it;
 	}
+
 }
 
 netBool RPCService::CheckTimeOut(RPC& _rpc)
@@ -86,10 +129,10 @@ void RPCService::Send(RPC& _rpc, const Peer& _peer)
 	_rpc.ChangeState(RPC::eState::STATE_SENDING);
 	_rpc.SetStartTime(Time::GetMsTime());
 
-	m_rpcs.push_back(&_rpc);
+	struct RPCChannel* rpcChannel = GetRPCChannel(_peer);
+	rpcChannel->m_rpcs.push(&_rpc);
 
 	Transport& transport = m_netduke->GetTransport();
-
 	if(transport.IsTCPEnabled())
 	{
 		transport.Send(_rpc.GetSerializer(), _peer, s_typeUnreliableListener);
@@ -107,7 +150,7 @@ netBool RPCService::Recv(SerializerLess& _ser, const Peer& _peer)
 	netBool ret = false;
 
 	// check if response
-	rpcs_t::iterator it = m_rpcs.begin();
+	/*rpcs_t::iterator it = m_rpcs.begin();
 	while(it != m_rpcs.end())
 	{
 		RPC& rpc = *(*it);
@@ -120,6 +163,27 @@ netBool RPCService::Recv(SerializerLess& _ser, const Peer& _peer)
 			break;
 		}
 		++it;
+	}*/
+
+	// reception is ordered (because it is reliable)
+	struct RPCChannel* rpcChannel = GetRPCChannel(_peer);
+	assert(rpcChannel);
+
+	if(!rpcChannel->m_rpcs.empty())
+	{
+		RPC* rpc = rpcChannel->m_rpcs.front();
+		if(rpc)
+		{
+			if(rpc->GetType() == _ser.GetType())
+			{
+				ret = RecvOut(*rpc, _ser);
+
+				if(ret)
+				{
+					rpcChannel->m_rpcs.pop();
+				}
+			}
+		}
 	}
 
 	return ret;
@@ -137,6 +201,23 @@ netBool RPCService::RecvOut(RPC& _rpc, SerializerLess& _ser)
 	return ret;
 }
 
+struct RPCChannel* RPCService::GetRPCChannel(const Peer& _peer)
+{
+	struct RPCChannel* channel = nullptr;
+	rpcChannel_t::iterator it = m_rpcs.find(_peer);
+
+	if(it != m_rpcs.end())
+	{
+		channel = it->second;
+	}
+	else
+	{
+		channel = new struct RPCChannel(_peer);
+		m_rpcs[_peer] = channel;
+	}
+
+	return channel;
+}
 
 
 
