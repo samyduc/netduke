@@ -17,7 +17,7 @@ ReliableListener::ReliableListener()
 	: m_pool(50)
 	, m_stream(nullptr)
 {
-	SetTimeOut(5000);
+	SetTimeOut(1000);
 }
 
 ReliableListener::~ReliableListener()

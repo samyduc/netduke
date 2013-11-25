@@ -203,27 +203,38 @@ netBool UDPStream::UnPack(SerializerLess& _ser, const Peer& _peer)
 	if(_ser.Read(s_typeUDPStream))
 	{
 		// check frame consistency (even if the type is correct)
-		if(_ser.GetSize() <= _ser.GetBufferSize())
+		if(_ser.GetSize() <= _ser.GetBufferSize() && _ser.GetSize() > GetHeaderSize())
 		{
 			// Packet seems well formed, check data crc for consitency now
 			netU32 crc_ser;
 			static_cast<Serializer&>(_ser) >> crc_ser;
 
 			SerializerLess upper_ser(_ser, GetHeaderSize(), _ser.GetBufferSize());
-			netU32 crc_cmp = CRC32::Compute(_ser.GetBuffer() + GetHeaderSize(), upper_ser.GetSize() - GetHeaderSize());
 
-			if(crc_cmp == crc_ser)
+			if(upper_ser.GetSize() <= upper_ser.GetBufferSize() && upper_ser.GetSize() > GetHeaderSize())
 			{
-				PushToStream(upper_ser, _peer);
+				netU32 crc_cmp = CRC32::Compute(_ser.GetBuffer() + GetHeaderSize(), upper_ser.GetSize() - GetHeaderSize());
+
+				if(crc_cmp == crc_ser)
+				{
+					PushToStream(upper_ser, _peer);
+				}
+				else
+				{
+					//assert(false);
+					// packet malformed drop
+				}
 			}
 			else
 			{
-				assert(false);
+				//assert(false);
+				// packet malformed drop
 			}
 		}
 		else
 		{
-			assert(false);
+			//assert(false);
+			// packet malformed drop
 		}
 		_ser.Close();
 	}
