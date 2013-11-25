@@ -26,6 +26,11 @@ int main(void)
 	NetDuke::NetDuke &netduke = server.GetNetDuke();
 	netduke.RegisterService(server);
 	
+	NetDuke::Serializer ser(1024);
+	ser.Write(12);
+	ser << 13;
+	ser.Close();
+
 	while(1)
 	{
 		netduke.Tick();

@@ -25,7 +25,7 @@ void Log(char *fmt, ...)
 
 
 PingPongServer::PingPongServer(NetDuke::netU16 _port)
-	: PingService(nullptr)
+	: ServiceHandler<PingPongServer>(nullptr, this)
 {
 	m_netduke = new NetDuke::NetDuke();
 	m_netduke->Init();
@@ -46,6 +46,9 @@ PingPongServer::~PingPongServer()
 void PingPongServer::Init()
 {
 	m_netduke->EnableRPC(true);
+
+	RegisterHandler(m_pingRPC, &PingPongServer::OnRecvPing);
+	RegisterHandler(m_superRPC, &PingPongServer::OnRecvSuperRPC);
 }
 
 void PingPongServer::DeInit()
@@ -60,9 +63,17 @@ void PingPongServer::Tick()
 NetDuke::netBool PingPongServer::OnRecvPing(NetDuke::Peer& _peer)
 {
 	printf("Rcv ping\n");
+	m_pingRPC.m_out.m_seq = m_pingRPC.m_in.m_seq;
+	m_pingRPC.m_out.m_time = m_pingRPC.m_in.m_time;
 
-	return PingService::OnRecvPing(_peer);
+	return true;
 }
 
+NetDuke::netBool PingPongServer::OnRecvSuperRPC(NetDuke::Peer& _peer)
+{
+	printf("Rcv superrpc\n");
+
+	return true;
+}
 
 };

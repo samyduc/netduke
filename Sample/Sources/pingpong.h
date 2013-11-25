@@ -9,6 +9,22 @@
 namespace NetDukeSample
 {
 
+
+
+class SuperRPC : public NetDuke::RPC
+{
+public:
+
+	NetDuke::netU32		GetType() const { return 12; }
+
+	NetDuke::Dataset&	In() { return m_in; }
+	NetDuke::Dataset&	Out() { return m_out; }
+
+	NetDuke::PingRPCIn	m_in;
+	NetDuke::PingRPCOut	m_out;
+
+};
+
 class Observer : public NetDuke::IObserver
 {
 public:
@@ -57,8 +73,8 @@ public:
 private:
 	Observer	m_observer;
 
-	NetDuke::Peer m_peer;
-	NetDuke::PingRPC m_rpc2;
+	NetDuke::Peer	m_peer;
+	SuperRPC		m_superprc;
 };
 
 

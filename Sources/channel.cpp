@@ -29,7 +29,7 @@ netBool Channel::Pop(SerializerLess& _ser)
 
 	if(!m_serializers.empty())
 	{
-		_ser = m_serializers.back();
+		_ser = m_serializers.front();
 		m_serializers.pop();
 		_ser.ResetCursor();
 	}

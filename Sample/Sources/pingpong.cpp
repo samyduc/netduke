@@ -101,23 +101,32 @@ void PingPongClient::Tick()
 
 			SendPing(m_peer);
 		}
+		else
+		{
+			assert(false);
+		}
 	}
 	else if(m_pingRPC.GetState() == NetDuke::RPC::eState::STATE_UNDEFINED)
 	{
 		// first send
 		SendPing(m_peer);
 
-		m_rpc2.m_in.m_time = 69;
+		// debug rpc
+		m_superprc.m_in.m_time = 69;
 		NetDuke::RPCService* service = m_netduke->GetRPCService();
-		service->Send(m_rpc2, m_peer);
+		service->Send(m_superprc, m_peer);
 	}
 
-	if(m_rpc2.IsComplete())
+	if(m_superprc.IsComplete())
 	{
-		if(m_rpc2.IsSuccess())
+		if(m_superprc.IsSuccess())
 		{
-			//NetDuke::RPCService* service = m_netduke->GetRPCService();
-			//service->Send(m_rpc2, m_peer);
+			NetDuke::RPCService* service = m_netduke->GetRPCService();
+			service->Send(m_superprc, m_peer);
+		}
+		else
+		{
+			assert(false);
 		}
 
 	}
