@@ -51,8 +51,9 @@ void PingService::SendPing(const Peer& _peer)
 	++m_seq;
 }
 
-netBool PingService::OnRecvPing(Peer& _peer)
+netBool PingService::OnRecvPing(RPC& _rpc, Peer& _peer)
 {
+	(void)_rpc;
 	(void)_peer;
 
 	m_pingRPC.m_out.m_time = m_pingRPC.m_in.m_time;

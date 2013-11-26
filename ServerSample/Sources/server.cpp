@@ -46,9 +46,11 @@ PingPongServer::~PingPongServer()
 void PingPongServer::Init()
 {
 	m_netduke->EnableRPC(true);
+	m_netduke->EnableEvent(true);
 
 	RegisterHandler(m_pingRPC, &PingPongServer::OnRecvPing);
 	RegisterHandler(m_superRPC, &PingPongServer::OnRecvSuperRPC);
+	RegisterHandler(m_superEvent, &PingPongServer::OnRecvSuperEvent);
 }
 
 void PingPongServer::DeInit()
@@ -60,7 +62,7 @@ void PingPongServer::Tick()
 {
 }
 
-NetDuke::netBool PingPongServer::OnRecvPing(NetDuke::Peer& _peer)
+NetDuke::netBool PingPongServer::OnRecvPing(NetDuke::RPC& _rpc, NetDuke::Peer& _peer)
 {
 	printf("Rcv ping\n");
 	m_pingRPC.m_out.m_seq = m_pingRPC.m_in.m_seq;
@@ -69,9 +71,16 @@ NetDuke::netBool PingPongServer::OnRecvPing(NetDuke::Peer& _peer)
 	return true;
 }
 
-NetDuke::netBool PingPongServer::OnRecvSuperRPC(NetDuke::Peer& _peer)
+NetDuke::netBool PingPongServer::OnRecvSuperRPC(NetDuke::RPC& _rpc, NetDuke::Peer& _peer)
 {
 	printf("Rcv superrpc\n");
+
+	return true;
+}
+
+NetDuke::netBool PingPongServer::OnRecvSuperEvent(NetDuke::Event& _event, NetDuke::Peer& _peer)
+{
+	printf("Rcv superevent\n");
 
 	return true;
 }

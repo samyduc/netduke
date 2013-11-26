@@ -2,6 +2,7 @@
 
 #include "service.h"
 #include "rpcservice.h"
+#include "eventservice.h"
 #include "peer.h"
 #include "serializer.h"
 #include "serializerless.h"
@@ -13,6 +14,7 @@ namespace NetDuke
 
 NetDuke::NetDuke()
 	: m_rpcService(nullptr)
+	, m_eventService(nullptr)
 	, m_publicObserver(nullptr)
 {
 	// safe 
@@ -34,6 +36,7 @@ void NetDuke::DeInit()
 {
 	// delete helpers
 	EnableRPC(false);
+	EnableEvent(false);
 
 	// delete services
 	for(services_t::iterator it=m_services.begin(); it!=m_services.end(); ++it)
@@ -150,6 +153,36 @@ void NetDuke::EnableRPC(netBool _state)
 
 			delete m_rpcService;
 			m_rpcService = nullptr;
+		}
+	}
+}
+
+void NetDuke::EnableEvent(netBool _state)
+{
+	if(_state)
+	{
+		if(m_eventService == nullptr)
+		{
+			// dummy check
+			Service* service = GetService(s_EventService);
+			assert(service == nullptr);
+
+			// rpc service must be first in lane
+			m_eventService = new EventService(this);
+			m_services.push_back(m_eventService);
+		}
+	}
+	else
+	{
+		if(m_eventService)
+		{
+			Service* service = GetService(s_EventService);
+			assert(service != nullptr);
+
+			UnRegisterService(*service);
+
+			delete m_eventService;
+			m_eventService = nullptr;
 		}
 	}
 }

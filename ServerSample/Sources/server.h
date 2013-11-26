@@ -25,6 +25,18 @@ public:
 
 };
 
+class SuperEvent : public NetDuke::Event
+{
+public:
+
+	NetDuke::netU32		GetType() const { return 13; }
+
+	NetDuke::Dataset&	In() { return m_in; }
+
+	NetDuke::PingRPCIn	m_in;
+
+};
+
 class Observer : public NetDuke::IObserver
 {
 public:
@@ -56,13 +68,15 @@ public:
 
 	NetDuke::NetDuke&	GetNetDuke() { return *m_netduke; }
 
-	virtual NetDuke::netBool	OnRecvPing(NetDuke::Peer& _peer);
-	virtual NetDuke::netBool	OnRecvSuperRPC(NetDuke::Peer& _peer);
+	virtual NetDuke::netBool	OnRecvPing(NetDuke::RPC& _rpc, NetDuke::Peer& _peer);
+	virtual NetDuke::netBool	OnRecvSuperRPC(NetDuke::RPC& _rpc, NetDuke::Peer& _peer);
+	virtual NetDuke::netBool	OnRecvSuperEvent(NetDuke::Event& _event, NetDuke::Peer& _peer);
 
 private:
-	SuperRPC	m_superRPC;
-	NetDuke::PingRPC		m_pingRPC;
-	Observer	m_observer;
+	SuperRPC			m_superRPC;
+	SuperEvent			m_superEvent;
+	NetDuke::PingRPC	m_pingRPC;
+	Observer			m_observer;
 
 };
 

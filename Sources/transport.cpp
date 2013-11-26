@@ -278,6 +278,9 @@ struct Activity* Transport::GetActivity(const Peer&_peer)
 	{
 		activity = new struct Activity(_peer);
 		m_activities[_peer] = activity;
+
+		// observer
+		m_observer->OnPeerAdded(_peer);
 	}
 
 	assert(activity);

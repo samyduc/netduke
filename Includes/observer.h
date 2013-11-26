@@ -17,6 +17,7 @@ public:
 	virtual				~IObserver() {}
 
 	virtual	void		OnUnregisteredMessage(SerializerLess& _ser, Peer& _peer) { (void)_ser; (void)_peer; };
+	virtual void		OnPeerAdded(const Peer& _peer) { (void)_peer; };
 	virtual void		OnPeerRemoved(const Peer& _peer) { (void)_peer; };
 
 protected:

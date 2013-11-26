@@ -5,6 +5,7 @@
 #include "serializerless.h"
 #include "peer.h"
 #include "rpc.h"
+#include "event.h"
 
 #include <map>
 
@@ -18,8 +19,7 @@ template<class TUP>
 class ServiceHandler : public Service
 {
 public:
-	typedef netBool (TUP::*rpchandler_t)(Peer&);
-
+	typedef netBool (TUP::*rpchandler_t)(RPC&, Peer&);
 	struct RPCHandler
 	{
 		RPCHandler()
@@ -34,8 +34,24 @@ public:
 		rpchandler_t	m_handler;
 		RPC*			m_rpc;
 	};
+	typedef std::map<netU32, struct RPCHandler> handlersRPC_t;
 
-	typedef std::map<netU32, struct RPCHandler> handlers_t;
+	typedef netBool (TUP::*eventhandler_t)(Event&, Peer&);
+	struct EventHandler
+	{
+		EventHandler()
+		{
+		}
+
+		EventHandler(Event& _event, eventhandler_t _handler)
+			: m_event(&_event), m_handler(_handler)
+		{
+		}
+
+		eventhandler_t	m_handler;
+		Event*			m_event;
+	};
+	typedef std::map<netU32, struct EventHandler> handlersEvent_t;
 
 public:
 	explicit ServiceHandler(NetDuke* _netduke, TUP* _this) : Service(_netduke), m_this(_this) {}
@@ -43,15 +59,15 @@ public:
 
 protected:
 
-	void RegisterHandler(RPC& _rpc, rpchandler_t _handler_func)
+	void RegisterHandler(Event& _event, eventhandler_t _handler_func)
 	{
 		//netU32 type = _rpc.In().GetType();
-		netU32 type = _rpc.GetType();
-		typename handlers_t::iterator it = m_handlers.find(type);
+		netU32 type = _event.GetType();
+		typename handlersEvent_t::iterator it = m_handlersEvent.find(type);
 
-		if(it == m_handlers.end())
+		if(it == m_handlersEvent.end())
 		{
-			m_handlers[type] = RPCHandler(_rpc, _handler_func);
+			m_handlersEvent[type] = EventHandler(_event, _handler_func);
 		}
 		else
 		{
@@ -60,13 +76,30 @@ protected:
 		}
 	}
 
-	void UnregisterHandler(netU32 _type)
+	void RegisterHandler(RPC& _rpc, rpchandler_t _handler_func)
 	{
-		typename handlers_t::iterator it = m_handlers.find(_type);
+		//netU32 type = _rpc.In().GetType();
+		netU32 type = _rpc.GetType();
+		typename handlersRPC_t::iterator it = m_handlersRPC.find(type);
 
-		if(it != m_handlers.end())
+		if(it == m_handlersRPC.end())
 		{
-			m_handlers.erase(it);
+			m_handlersRPC[type] = RPCHandler(_rpc, _handler_func);
+		}
+		else
+		{
+			// try to register the same function twice
+			assert(false);
+		}
+	}
+
+	void UnregisterHandler(RPC& _rpc)
+	{
+		typename handlersRPC_t::iterator it = m_handlersRPC.find(_rpc.GetType());
+
+		if(it != m_handlersRPC.end())
+		{
+			m_handlersRPC.erase(it);
 		}
 	}
 
@@ -74,9 +107,9 @@ protected:
 	{ 
 		netU32 type = _ser.GetType();
 		netBool ret = false;
-		typename handlers_t::iterator it = m_handlers.find(type);
+		typename handlersRPC_t::iterator it = m_handlersRPC.find(type);
 
-		if(it != m_handlers.end())
+		if(it != m_handlersRPC.end())
 		{
 			SerializerLess response;
 			struct RPCHandler &handler = it->second;
@@ -86,7 +119,7 @@ protected:
 			if(ret)
 			{
 				handler.m_rpc->ChangeError(RPC::eError::ERROR_OK);
-				ret = ((*m_this).*(handler.m_handler))(_peer);
+				ret = ((*m_this).*(handler.m_handler))(*handler.m_rpc, _peer);
 			}
 			else
 			{
@@ -110,13 +143,30 @@ protected:
 				}
 			}
 		}
+		else
+		{
+			// check event after rpc !
+			typename handlersEvent_t::iterator it = m_handlersEvent.find(type);
+
+			if(it != m_handlersEvent.end())
+			{
+				struct EventHandler &handler = it->second;
+
+				ret = handler.m_event->UnSerialize(handler.m_event->In(), _ser);
+				if(ret)
+				{
+					ret = ((*m_this).*(handler.m_handler))(*handler.m_event, _peer);
+				}
+			}
+		}
 
 		return ret; 
 	}
 
 protected:
-	handlers_t	m_handlers;
-	TUP*		m_this;
+	handlersRPC_t	m_handlersRPC;
+	handlersEvent_t m_handlersEvent;
+	TUP*			m_this;
 
 };
 

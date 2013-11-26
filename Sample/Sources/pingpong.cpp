@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "rpcservice.h"
+#include "eventservice.h"
 
 namespace NetDukeSample
 {
@@ -81,6 +82,7 @@ PingPongClient::~PingPongClient()
 void PingPongClient::Init()
 {
 	m_netduke->EnableRPC(true);
+	m_netduke->EnableEvent(true);
 }
 
 void PingPongClient::DeInit()
@@ -123,6 +125,12 @@ void PingPongClient::Tick()
 		{
 			NetDuke::RPCService* service = m_netduke->GetRPCService();
 			service->Send(m_superprc, m_peer);
+
+			m_superevent.m_in.m_seq = 78;
+			m_superevent.m_in.m_time = 79;
+			NetDuke::EventService* service_event = m_netduke->GetEventService();
+			service_event->SendReliable(m_superevent, m_peer);
+			service_event->SendUnReliable(m_superevent, m_peer);
 		}
 		else
 		{

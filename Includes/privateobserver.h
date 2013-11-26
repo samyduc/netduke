@@ -19,6 +19,7 @@ public:
 	virtual				~PrivateObserver() {}
 
 	virtual	void		OnUnregisteredMessage(SerializerLess& _ser, Peer& _peer);
+	virtual void		OnPeerAdded(const Peer& _peer);
 	virtual void		OnPeerRemoved(const Peer& _peer);
 
 protected:

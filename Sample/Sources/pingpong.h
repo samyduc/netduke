@@ -3,6 +3,7 @@
 #include "netduke.h"
 
 #include "pingservice.h"
+#include "event.h"
 
 #include <ctime>
 
@@ -22,6 +23,18 @@ public:
 
 	NetDuke::PingRPCIn	m_in;
 	NetDuke::PingRPCOut	m_out;
+
+};
+
+class SuperEvent : public NetDuke::Event
+{
+public:
+
+	NetDuke::netU32		GetType() const { return 13; }
+
+	NetDuke::Dataset&	In() { return m_in; }
+
+	NetDuke::PingRPCIn	m_in;
 
 };
 
@@ -75,6 +88,7 @@ private:
 
 	NetDuke::Peer	m_peer;
 	SuperRPC		m_superprc;
+	SuperEvent		m_superevent;
 };
 
 

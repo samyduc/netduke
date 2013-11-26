@@ -95,7 +95,7 @@ public:
 	netU64					GetLastPingMs() { return m_lastPingMs; } 
 
 	// overload for custom use
-	virtual netBool			OnRecvPing(Peer& _peer);
+	virtual netBool			OnRecvPing(RPC& _rpc, Peer& _peer);
 
 protected:
 

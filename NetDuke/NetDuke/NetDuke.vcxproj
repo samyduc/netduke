@@ -285,6 +285,7 @@
     <ClInclude Include="..\..\Includes\crc.h" />
     <ClInclude Include="..\..\Includes\dataset.h" />
     <ClInclude Include="..\..\Includes\event.h" />
+    <ClInclude Include="..\..\Includes\eventservice.h" />
     <ClInclude Include="..\..\Includes\extinclude.h" />
     <ClInclude Include="..\..\Includes\listener.h" />
     <ClInclude Include="..\..\Includes\netdef.h" />
@@ -313,7 +314,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\Sources\channel.cpp" />
     <ClCompile Include="..\..\Sources\crc.cpp" />
-    <ClCompile Include="..\..\Sources\event.cpp" />
+    <ClCompile Include="..\..\Sources\eventservice.cpp" />
     <ClCompile Include="..\..\Sources\linux\linux_peer.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Clang'">true</ExcludedFromBuild>

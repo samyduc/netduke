@@ -124,7 +124,7 @@ int main(void)
 	//Sleep(50);
 
 	std::list<std::thread> threads;
-	for(size_t i = 0; i<1; ++i)
+	for(size_t i = 0; i<10; ++i)
 	{
 		threads.push_back(std::thread(threaded_client));
 	}
