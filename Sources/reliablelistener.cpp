@@ -499,6 +499,12 @@ void ReliableListener::DeletePeer(const Peer& _peer)
 		delete channel;
 		m_recvChannels.erase(it_channel_rcv);
 	}
+
+	reliableInfo_t::iterator it_reliableinfo = m_reliableInfo.find(_peer);
+	if(it_reliableinfo != m_reliableInfo.end())
+	{
+		m_reliableInfo.erase(it_reliableinfo);
+	}
 }
 
 
