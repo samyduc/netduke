@@ -382,8 +382,28 @@ netBool ReliableListener::RecvSequence(PlayerReliableInfo_t &_reliableInfo, Seri
 		if(_sequence != 0)
 		{
 			_ser.Close();
-			struct ReliableRecvInfo recvInfo(_sequence, _ser);
-			_reliableInfo.m_recv.push_front(recvInfo);
+			
+			netBool already_in = false;
+			std::list<ReliableRecvInfo>::iterator iter = _reliableInfo.m_recv.begin();
+			// add only if not already present in the queue
+			while(iter != _reliableInfo.m_recv.end())
+			{
+				struct ReliableRecvInfo& cmp = (*iter);
+				
+				if(cmp.m_sequence == _sequence)
+				{
+					already_in = true;
+					break;
+				}
+
+				++iter;
+			}
+
+			if(already_in)
+			{
+				struct ReliableRecvInfo recvInfo(_sequence, _ser);
+				_reliableInfo.m_recv.push_front(recvInfo);
+			}
 		}
 	}
 
