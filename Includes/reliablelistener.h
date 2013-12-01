@@ -8,7 +8,7 @@
 #include "serializerless.h"
 #include "serializerpool.h"
 
-#include <list>
+#include <forward_list>
 #include "timeplatform.h"
 
 #include <assert.h>
@@ -52,6 +52,9 @@ struct ReliableRecvInfo
 	seq_t			m_sequence;
 	SerializerLess	m_ser;
 };
+
+typedef std::list<ReliableSendInfo>	reliableSendInfoList_t;
+typedef	std::list<ReliableRecvInfo>	reliableRecvInfoList_t;
 
 struct PlayerReliableInfo
 {
@@ -108,8 +111,8 @@ struct PlayerReliableInfo
 	seq_t						m_currentSequence;
 	ack_t						m_recvAck;
 	timer_t						m_ackRecvTime;
-	std::list<ReliableSendInfo>	m_send;
-	std::list<ReliableRecvInfo>	m_recv;
+	reliableSendInfoList_t		m_send;
+	reliableRecvInfoList_t		m_recv;
 };
 typedef struct PlayerReliableInfo PlayerReliableInfo_t;
 

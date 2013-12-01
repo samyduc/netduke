@@ -117,7 +117,8 @@ void ReliableListener::SendToStream(SerializerLess& _ser, const Peer &_peer)
 		{
 			// only wait ack if not a pure ack packet
 			struct ReliableSendInfo sendInfo(sequence, _ser);
-			reliableInfo.m_send.push_back(sendInfo);
+			//reliableInfo.m_send.push_back(sendInfo);
+			reliableInfo.m_send.push_front(sendInfo);
 		}
 }
 
@@ -164,7 +165,7 @@ void ReliableListener::FlushTimeout()
 		}
 
 		// check expired packet
-		std::list<ReliableSendInfo>::iterator iter = reliableInfo.m_send.begin();
+		reliableSendInfoList_t::iterator iter = reliableInfo.m_send.begin();
 		while( iter != reliableInfo.m_send.end())
 		{
 			struct ReliableSendInfo& sendInfo = (*iter);

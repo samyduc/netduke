@@ -34,6 +34,7 @@ int main(void)
 	while(1)
 	{
 		netduke.Tick();
+		Sleep(1);
 	}
 	
 
