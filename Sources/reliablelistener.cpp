@@ -47,7 +47,7 @@ void ReliableListener::Flush()
 	if(m_stream)
 	{
 		m_stream->DetachListener(*this);
-		UnRegisterStream(*m_stream);
+		//UnRegisterStream(*m_stream);
 	}
 }
 
